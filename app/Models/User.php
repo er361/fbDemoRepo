@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Validator;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
@@ -22,30 +23,33 @@ class User extends Authenticatable implements JWTSubject
      *
      * @var string[]
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $fillable
+        = [
+            'display_name',
+            'username',
+            'password',
+        ];
 
     /**
      * The attributes that should be hidden for serialization.
      *
      * @var array
      */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden
+        = [
+            'password',
+            'remember_token',
+        ];
 
     /**
      * The attributes that should be cast.
      *
      * @var array
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    protected $casts
+        = [
+            'email_verified_at' => 'datetime',
+        ];
 
     public function tarif()
     {
@@ -54,7 +58,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function team()
     {
-        return $this->hasOne(Team::class,'founder_id');
+        return $this->hasOne(Team::class, 'founder_id');
     }
 
     public function getJWTIdentifier()
@@ -67,5 +71,15 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
+    protected static function booted()
+    {
+        static::created(function ($user) {
+            // Создать команду
+            $user->team()->create(['name' => $user->username]);
 
+            // Прописать ID команды пользователю
+            $user->team_id = $user->team->id;
+            $user->save();
+        });
+    }
 }
