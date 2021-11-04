@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTarifsTable extends Migration
+class CreateFbAccountsPermissionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,10 @@ class CreateTarifsTable extends Migration
      */
     public function up()
     {
-        Schema::create('tarifs', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->integer('user_id');
-            $table->enum('plan',['alpha','beta','trial','base','pro'])->default('alpha');
-            $table->unsignedInteger('users_limit')->default(3);
+        Schema::create('fb_accounts_permissions', function (Blueprint $table) {
+            $table->uuid('id');
+            $table->uuid('user_id');
+            $table->string('name');
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ class CreateTarifsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('tarifs');
+        Schema::dropIfExists('fb_accounts_permissions');
     }
 }

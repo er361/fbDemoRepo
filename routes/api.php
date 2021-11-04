@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -32,6 +33,11 @@ Route::prefix('auth')->group(function () {
 
 });
 
-Route::prefix('users')->middleware('auth:api')->group(function () {
-    Route::put('{id}/changePassword', [UserController::class, 'changePassword']);
+
+Route::middleware('auth:api')->group(function(){
+    Route::prefix('users')->group(function () {
+        Route::put('{id}/changePassword', [UserController::class, 'changePassword']);
+    });
+
+    Route::apiResource('accounts', AccountController::class);
 });
