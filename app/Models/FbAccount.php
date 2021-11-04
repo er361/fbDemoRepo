@@ -5,10 +5,11 @@ namespace App\Models;
 use App\Models\Helpers\Uuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FbAccount extends Model
 {
-    use HasFactory, Uuid;
+    use HasFactory, Uuid, SoftDeletes;
 
     protected $fillable = [
         'user_id',
@@ -22,7 +23,7 @@ class FbAccount extends Model
 
     public function tags()
     {
-        return $this->hasMany(FbAccountsTag::class,'user_id','user_id');
+        return $this->hasMany(FbAccountsTag::class,'','user_id');
     }
 
     public function permissions()

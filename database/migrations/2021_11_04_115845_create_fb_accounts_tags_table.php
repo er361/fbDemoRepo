@@ -15,8 +15,9 @@ class CreateFbAccountsTagsTable extends Migration
     {
         Schema::create('fb_accounts_tags', function (Blueprint $table) {
             $table->uuid('id');
-            $table->uuid('user_id');
-            $table->string('title');
+            $table->uuid('account_id');
+            $table->uuid('team_id');
+            $table->string('name');
             $table->timestamps();
         });
     }
