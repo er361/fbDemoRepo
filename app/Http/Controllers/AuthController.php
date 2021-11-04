@@ -60,10 +60,10 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-//        $message = $this->checkLimiter($request);
-//        if ($message) {
-//            return response()->json(['message' => $message], 429);
-//        }
+        $message = $this->checkLimiter($request);
+        if ($message) {
+            return response()->json(['message' => $message], 429);
+        }
 
         $user = User::create(
             array_merge(
