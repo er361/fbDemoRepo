@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Team extends Model
 {
-    use HasFactory,Uuid;
-    protected $primaryKey = 'founder_id';
+    use HasFactory, Uuid;
+
+    protected $fillable = ['name'];
 }

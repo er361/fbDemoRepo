@@ -28,8 +28,8 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
+            'username' => 'required|email',
+            'password' => 'required|string|min:5',
         ]);
 
         if ($validator->fails()) {
@@ -50,11 +50,10 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
-            'display_name' => 'string|between:2,100',
-            'username' => 'required|string|email|max:100|unique:users',
-            'password' => 'required|string|confirmed|min:6',
+            'display_name' => 'nullable|string|between:2,255',
+            'username'     => 'required|string|email|max:255|unique:users',
+            'password'     => 'required|string|min:5',
         ]);
 
         if ($validator->fails()) {
@@ -62,19 +61,19 @@ class AuthController extends Controller
         }
 
         $message = $this->checkLimiter($request);
-        if ($message)
-            return response()->json(['message' => $message],429);
+        if ($message) {
+            return response()->json(['message' => $message], 429);
+        }
 
-        $user = User::create(array_merge(
-            $validator->validated(),
-            ['password' => bcrypt($request->password)]
-        ));
-
-        $user->team()->create();
+        $user = User::create(
+            array_merge(
+                $validator->validated(),
+                ['password' => bcrypt($request->password)]
+            )
+        );
 
         return response()->json([
-            'message' => 'User successfully registered',
-            'user' => $user
+            'data' => $user
         ], 201);
     }
 
@@ -121,15 +120,18 @@ class AuthController extends Controller
     protected function createNewToken($token)
     {
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => Auth::factory()->getTTL() * 60,
-            'user' => Auth::user()
+            'data' => [
+                'access_token' => $token,
+                'token_type'   => 'bearer',
+                'expires_in'   => Auth::factory()->getTTL() * 60,
+                'user'         => Auth::user()
+            ]
         ]);
     }
 
     /**
      * @param Request $request
+     *
      * @return string
      */
     public function checkLimiter(Request $request)
@@ -141,7 +143,8 @@ class AuthController extends Controller
             3,
             function () {
                 // Send message...
-            }, 60 * 60
+            },
+            60 * 60
         );
 
         if (RateLimiter::tooManyAttempts($key, 3)) {
