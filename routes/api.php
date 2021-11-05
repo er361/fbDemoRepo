@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProxyController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -37,3 +38,9 @@ Route::middleware('auth:api')->group(function () {
 
     Route::apiResource('profile', AccountController::class);
 });
+
+Route::middleware('auth:api')->group(function () {
+    Route::apiResource('proxy', ProxyController::class);
+});
+
+
