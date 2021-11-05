@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class CreateTeamsTable extends Migration
@@ -18,6 +19,8 @@ class CreateTeamsTable extends Migration
             $table->string('name')->nullable();
             $table->timestamps();
         });
+
+        DB::statement('alter table teams TRANSACTIONAL=0');
     }
 
     /**

@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class CreateFbAccountsTagsTable extends Migration
@@ -20,6 +21,8 @@ class CreateFbAccountsTagsTable extends Migration
             $table->string('name');
             $table->timestamps();
         });
+
+        DB::statement('alter table fb_accounts_tags TRANSACTIONAL=0');
     }
 
     /**

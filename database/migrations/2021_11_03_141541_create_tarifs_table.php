@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class CreateTarifsTable extends Migration
@@ -20,6 +21,8 @@ class CreateTarifsTable extends Migration
             $table->unsignedInteger('users_limit')->default(3);
             $table->timestamps();
         });
+
+        DB::statement('alter table tarifs TRANSACTIONAL=0');
     }
 
     /**

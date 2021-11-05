@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class CreateFbAccountsPermissionsTable extends Migration
@@ -22,6 +23,8 @@ class CreateFbAccountsPermissionsTable extends Migration
             ]);
             $table->timestamps();
         });
+
+        DB::statement('alter table fb_accounts_permissions TRANSACTIONAL=0');
     }
 
     /**
