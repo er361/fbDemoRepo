@@ -74,12 +74,14 @@ class User extends Authenticatable implements JWTSubject
     protected static function booted()
     {
         static::created(function ($user) {
-            // Создать команду
-            $user->team()->create(['name' => $user->username]);
+            if (empty($user->team_id)) {
+                // Создать команду
+                $user->team()->create(['name' => $user->username]);
 
-            // Прописать ID команды пользователю
-            $user->team_id = $user->team->id;
-            $user->save();
+                // Прописать ID команды пользователю
+                $user->team_id = $user->team->id;
+                $user->save();
+            }
         });
     }
 }
