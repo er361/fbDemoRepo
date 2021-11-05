@@ -8,6 +8,7 @@ use App\Models\Proxy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AccountController extends Controller
 {
@@ -101,15 +102,15 @@ class AccountController extends Controller
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param \App\Models\FbAccount $fbAccount
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(FbAccount $fbAccount)
+    public function deleteBulk(Request $request)
     {
-        //
+        $this->validate($request, [
+            'ids' => 'array|required',
+            'ids.*' => 'uuid'
+        ]);
+        FbAccount::query()->whereIn('id', $request->get('ids'))
+            ->where('user_id', Auth::id())
+            ->delete();
     }
 
     /**

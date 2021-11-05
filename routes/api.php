@@ -34,14 +34,13 @@ Route::middleware('auth:api')->group(function () {
         Route::put('{id}/change-password', [UserController::class, 'changePassword']);
     });
 
+    Route::prefix('accounts')->group(function () {
+        Route::delete('delete-bulk', [AccountController::class, 'deleteBulk']);
+    });
     Route::apiResource('accounts', AccountController::class);
-});
 
-Route::middleware('auth:api')->group(function () {
     Route::apiResource('proxy', ProxyController::class);
 });
 
-Route::get('test', function () {
-});
 
 
