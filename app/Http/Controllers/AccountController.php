@@ -37,16 +37,21 @@ class AccountController extends Controller
             'user_agent' => 'string',
             'cookies' => 'json',
             'tags' => 'array',
-            'tags.*' => 'string'
+            'tags.*' => 'string',
+            'proxy_id' => 'string',
+            'proxy' => 'array:type,name,host,login,port',
+            'proxy.port' => 'integer'
         ]);
 
-        $account = FbAccount::query()->create(array_merge(
-            $request->all(),
-            [
-                'user_id' => Auth::id(),
-                'team_id' => Auth::user()->team->id
-            ]
-        ));
+        $account = FbAccount::query()->create(
+            array_merge(
+                $request->all(),
+                [
+                    'user_id' => Auth::id(),
+                    'team_id' => Auth::user()->team->id
+                ]
+            )
+        );
 
         $tags = collect($request->get('tags'))
             ->transform(fn($tag) => [
@@ -57,7 +62,6 @@ class AccountController extends Controller
         $account->tags()->createMany($tags);
 
         return new FbAccountResource($account->load('tags'));
-
     }
 
     /**
