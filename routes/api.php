@@ -39,6 +39,9 @@ Route::middleware('auth:api')->group(function () {
     });
     Route::apiResource('accounts', AccountController::class);
 
+    Route::prefix('proxy')->group(function () {
+        Route::delete('delete-bulk', [ProxyController::class, 'deleteBulk']);
+    });
     Route::apiResource('proxy', ProxyController::class);
 });
 

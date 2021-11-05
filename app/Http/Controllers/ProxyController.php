@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ListRequest;
 use App\Http\Resources\ProxyResource;
+use App\Models\FbAccount;
 use App\Models\Proxy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -81,15 +82,15 @@ class ProxyController extends Controller
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param \App\Models\Proxy $proxy
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Proxy $proxy)
+    public function deleteBulk(Request $request)
     {
-        //
+        $this->validate($request, [
+            'ids' => 'array|required',
+            'ids.*' => 'uuid'
+        ]);
+
+        Proxy::query()->whereIn('id', $request->get('ids'))
+            ->where('user_id', Auth::id())
+            ->delete();
     }
 }
