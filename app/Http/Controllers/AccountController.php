@@ -113,6 +113,31 @@ class AccountController extends Controller
             ->delete();
     }
 
+    public function archiveBulk(Request $request)
+    {
+        $this->validate($request, [
+            'ids' => 'array|required',
+            'ids.*' => 'uuid'
+        ]);
+//        DB::enableQueryLog();
+        FbAccount::query()->whereIn('id', $request->get('ids'))
+            ->where('user_id', Auth::id())
+            ->update(['archived' => true]);
+//        dd(DB::getQueryLog());
+    }
+
+    public function unArchiveBulk(Request $request)
+    {
+        $this->validate($request, [
+            'ids' => 'array|required',
+            'ids.*' => 'uuid'
+        ]);
+
+        FbAccount::query()->whereIn('id', $request->get('ids'))
+            ->where('user_id', Auth::id())
+            ->update(['archived' => false]);
+    }
+
     /**
      * @param Request $request
      * @return \Illuminate\Support\Collection

@@ -21,6 +21,7 @@ class FbAccount extends Model
         'password',
         'user_agent',
         'cookies',
+        'archived'
     ];
 
     public function tags()

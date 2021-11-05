@@ -36,6 +36,8 @@ Route::middleware('auth:api')->group(function () {
 
     Route::prefix('accounts')->group(function () {
         Route::delete('delete-bulk', [AccountController::class, 'deleteBulk']);
+        Route::put('archive-bulk', [AccountController::class, 'archiveBulk']);
+        Route::put('unarchive-bulk', [AccountController::class, 'unArchiveBulk']);
     });
     Route::apiResource('accounts', AccountController::class);
 
