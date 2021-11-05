@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProxyController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -37,3 +38,6 @@ Route::prefix('/profile')->group(function () {
 Route::prefix('users')->middleware('auth:api')->group(function () {
     Route::put('{id}/changePassword', [UserController::class, 'changePassword']);
 });
+
+Route::apiResource('proxy', ProxyController::class);
+
