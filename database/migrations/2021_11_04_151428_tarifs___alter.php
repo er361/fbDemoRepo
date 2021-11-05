@@ -17,6 +17,9 @@ class TarifsAlter extends Migration
         Schema::table('teams_subscriptions', function (Blueprint $table) {
             $table->dropColumn('user_id');
             $table->uuid('team_id')->after('id');
+            $table->foreign('team_id')
+                ->references('id')
+                ->on('teams_subscriptions');
         });
     }
 

@@ -22,6 +22,14 @@ class CreateFbAccountsPermissionsTable extends Migration
                 'read','update','delete','stat'
             ]);
             $table->timestamps();
+
+            $table->foreign('account_id')
+                ->references('id')
+                ->on('fb_accounts');
+
+            $table->foreign('team_id')
+                ->references('id')
+                ->on('teams');
         });
 
         DB::statement('alter table fb_accounts_permissions TRANSACTIONAL=0');

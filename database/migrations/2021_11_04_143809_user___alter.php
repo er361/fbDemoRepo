@@ -21,6 +21,10 @@ class UserAlter extends Migration
             $table->softDeletes()->after('updated_at');
             $table->uuid('team_id')->nullable(false)->after('id');
             $table->string('username')->after('team_id')->unique();
+
+            $table->foreign('team_id')
+                ->references('id')
+                ->on('teams');
         });
     }
 

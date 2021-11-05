@@ -20,7 +20,16 @@ class CreateFbAccountsTagsTable extends Migration
             $table->uuid('team_id');
             $table->string('name');
             $table->timestamps();
+
+            $table->foreign('account_id')
+                ->references('id')
+                ->on('fb_accounts');
+
+            $table->foreign('team_id')
+                ->references('id')
+                ->on('teams');
         });
+
 
         DB::statement('alter table fb_accounts_tags TRANSACTIONAL=0');
     }

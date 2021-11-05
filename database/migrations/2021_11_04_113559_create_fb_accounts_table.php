@@ -38,6 +38,14 @@ class CreateFbAccountsTable extends Migration
             $table->boolean('advertising_rules_accepted')->default(false);
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users');
+
+            $table->foreign('team_id')
+                ->references('id')
+                ->on('teams');
         });
 
         DB::statement('alter table fb_accounts TRANSACTIONAL=0');

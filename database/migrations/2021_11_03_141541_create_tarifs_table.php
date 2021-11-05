@@ -20,6 +20,10 @@ class CreateTarifsTable extends Migration
             $table->enum('plan',['alpha','beta','trial','base','pro'])->default('alpha');
             $table->unsignedInteger('users_limit')->default(3);
             $table->timestamps();
+
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users');
         });
 
         DB::statement('alter table tarifs TRANSACTIONAL=0');

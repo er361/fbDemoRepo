@@ -18,6 +18,10 @@ class CreateTeamsTable extends Migration
             $table->uuid('founder_id');
             $table->string('name')->nullable();
             $table->timestamps();
+
+            $table->foreign('founder_id')
+                ->references('id')
+                ->on('users');
         });
 
         DB::statement('alter table teams TRANSACTIONAL=0');
