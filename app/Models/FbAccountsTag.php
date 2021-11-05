@@ -11,7 +11,8 @@ class FbAccountsTag extends Model
     use HasFactory,Uuid;
     protected $fillable = [
         'user_id',
-        'title'
+        'name',
+        'team_id'
     ];
 
     protected $hidden = [

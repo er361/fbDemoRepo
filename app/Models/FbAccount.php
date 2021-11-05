@@ -13,6 +13,7 @@ class FbAccount extends Model
 
     protected $fillable = [
         'user_id',
+        'team_id',
         'name',
         'access_token',
         'business_access_token',
@@ -23,11 +24,16 @@ class FbAccount extends Model
 
     public function tags()
     {
-        return $this->hasMany(FbAccountsTag::class);
+        return $this->hasMany(FbAccountsTag::class,'account_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function permissions()
     {
-        return $this->hasMany(FbAccountsPermission::class);
+        return $this->hasMany(FbAccountsPermission::class,'account_id');
     }
 }

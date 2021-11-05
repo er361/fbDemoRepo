@@ -23,13 +23,13 @@ class AccountController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return FbAccountResource
      */
     public function store(Request $request)
     {
         //
-        $this->validate($request,[
+        $this->validate($request, [
             'name' => 'required|string',
             'access_token' => 'required|string',
             'business_access_token' => 'string',
@@ -42,11 +42,17 @@ class AccountController extends Controller
 
         $account = FbAccount::query()->create(array_merge(
             $request->all(),
-            ['user_id' => Auth::id()]
+            [
+                'user_id' => Auth::id(),
+                'team_id' => Auth::user()->team->id
+            ]
         ));
 
         $tags = collect($request->get('tags'))
-            ->transform(fn($tag) => ['name' => $tag]);
+            ->transform(fn($tag) => [
+                'name' => $tag,
+                'team_id' => Auth::user()->team->id
+            ]);
 
         $account->tags()->createMany($tags);
 
@@ -57,7 +63,7 @@ class AccountController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\FbAccount  $fbAccount
+     * @param \App\Models\FbAccount $fbAccount
      * @return \Illuminate\Http\Response
      */
     public function show(FbAccount $fbAccount)
@@ -68,8 +74,8 @@ class AccountController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\FbAccount  $fbAccount
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\FbAccount $fbAccount
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, FbAccount $fbAccount)
@@ -80,7 +86,7 @@ class AccountController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\FbAccount  $fbAccount
+     * @param \App\Models\FbAccount $fbAccount
      * @return \Illuminate\Http\Response
      */
     public function destroy(FbAccount $fbAccount)
