@@ -14,7 +14,7 @@ class CreateFbAccountsTable extends Migration
     public function up()
     {
         Schema::create('fb_accounts', function (Blueprint $table) {
-            $table->uuid('id');
+            $table->uuid('id')->primary();
             $table->uuid('user_id');
             $table->uuid('team_id');
             $table->string('name');

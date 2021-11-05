@@ -14,7 +14,7 @@ class CreateTeamsTable extends Migration
     public function up()
     {
         Schema::create('teams', function (Blueprint $table) {
-            $table->uuid('founder_id')->primary();
+            $table->uuid('founder_id');
             $table->string('name')->nullable();
             $table->timestamps();
         });

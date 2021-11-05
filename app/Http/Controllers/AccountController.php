@@ -46,7 +46,7 @@ class AccountController extends Controller
         ));
 
         $tags = collect($request->get('tags'))
-            ->transform(fn($tag) => ['title' => $tag]);
+            ->transform(fn($tag) => ['name' => $tag]);
 
         $account->tags()->createMany($tags);
 

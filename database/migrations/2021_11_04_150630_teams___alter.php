@@ -14,7 +14,6 @@ class TeamsAlter extends Migration
     public function up()
     {
         Schema::table('teams', function (Blueprint $table) {
-            $table->dropIndex('PRIMARY');
             $table->uuid('id')->primary()->first();
             $table->SoftDeletes()->after('updated_at');
         });

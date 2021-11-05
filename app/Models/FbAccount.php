@@ -16,18 +16,18 @@ class FbAccount extends Model
         'name',
         'access_token',
         'business_access_token',
-        'password' => 'string',
+        'password',
         'user_agent',
         'cookies',
     ];
 
     public function tags()
     {
-        return $this->hasMany(FbAccountsTag::class,'','user_id');
+        return $this->hasMany(FbAccountsTag::class);
     }
 
     public function permissions()
     {
-        return $this->hasMany(FbAccountsPermission::class,'user_id');
+        return $this->hasMany(FbAccountsPermission::class);
     }
 }

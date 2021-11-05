@@ -14,7 +14,7 @@ class CreateFbAccountsPermissionsTable extends Migration
     public function up()
     {
         Schema::create('fb_accounts_permissions', function (Blueprint $table) {
-            $table->uuid('id');
+            $table->uuid('id')->primary();
             $table->uuid('account_id');
             $table->uuid('team_id');
             $table->enum('name',[
