@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ListRequest;
 use App\Http\Resources\ProxyResource;
 use App\Models\Proxy;
 use Illuminate\Http\Request;
@@ -12,11 +13,14 @@ class ProxyController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index()
+    public function index(ListRequest $request)
     {
-        //
+        $proxies = Proxy::query()->where('user_id', Auth::id())
+            ->paginate($request->get('perPage'));
+
+        return ProxyResource::collection($proxies);
     }
 
     /**
@@ -29,12 +33,12 @@ class ProxyController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'type'          => 'string|required|in:http,https,socks5,socks4,ssh',
-            'name'          => 'string',
-            'host'          => 'required|string',
-            'port'          => 'required|integer',
-            'login'         => 'string',
-            'password'      => 'string',
+            'type' => 'string|required|in:http,https,socks5,socks4,ssh',
+            'name' => 'string',
+            'host' => 'required|string',
+            'port' => 'required|integer',
+            'login' => 'string',
+            'password' => 'string',
             'change_ip_url' => 'string'
         ]);
 
@@ -68,7 +72,7 @@ class ProxyController extends Controller
      * Update the specified resource in storage.
      *
      * @param \Illuminate\Http\Request $request
-     * @param \App\Models\Proxy        $proxy
+     * @param \App\Models\Proxy $proxy
      *
      * @return \Illuminate\Http\Response
      */

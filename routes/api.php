@@ -39,5 +39,8 @@ Route::prefix('users')->middleware('auth:api')->group(function () {
     Route::put('{id}/changePassword', [UserController::class, 'changePassword']);
 });
 
-Route::apiResource('proxy', ProxyController::class);
+Route::middleware('auth:api')->group(function () {
+    Route::apiResource('proxy', ProxyController::class);
+});
+
 

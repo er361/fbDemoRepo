@@ -10,20 +10,19 @@ class Proxy extends Model
 {
     use HasFactory, Uuid;
 
-    protected $fillable
-        = [
-            'team_id',
-            'user_id',
-            'type',
-            'name',
-            'host',
-            'port',
-            'login',
-            'password',
-            'change_ip_url',
-            'status',
-            'external_ip',
-            'change_ip_url',
-            'expiration_date',
-        ];
+    protected $fillable = [
+        'team_id',
+        'user_id',
+        'type',
+        'name',
+        'host',
+        'port',
+        'login',
+        'password',
+        'change_ip_url',
+        'status',
+        'external_ip',
+        'change_ip_url',
+        'expiration_date',
+    ];
 }
