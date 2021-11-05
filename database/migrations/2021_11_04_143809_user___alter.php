@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class UserAlter extends Migration
@@ -20,7 +21,13 @@ class UserAlter extends Migration
             $table->dropColumn('remember_token');
             $table->softDeletes()->after('updated_at');
             $table->uuid('team_id')->nullable(false)->after('id');
-            $table->string('username')->after('team_id')->unique();
+            $table->string('username')
+                ->after('team_id')->unique();
+
+            $table->foreign('team_id')
+                ->references('id')
+                ->on('teams');
+            $table->index('display_name');
         });
     }
 
