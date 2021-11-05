@@ -16,7 +16,10 @@ class CreateTeamsTable extends Migration
     {
         Schema::create('teams', function (Blueprint $table) {
             $table->uuid('founder_id');
-            $table->string('name')->nullable();
+            $table->string('name')
+                ->index()
+                ->nullable();
+
             $table->timestamps();
 
             $table->foreign('founder_id')

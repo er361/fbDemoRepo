@@ -18,7 +18,7 @@ class CreateFbAccountsTagsTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('account_id');
             $table->uuid('team_id');
-            $table->string('name');
+            $table->string('name')->index();
             $table->timestamps();
 
             $table->foreign('account_id')

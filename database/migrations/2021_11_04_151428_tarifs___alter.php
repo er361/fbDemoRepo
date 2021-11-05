@@ -19,7 +19,7 @@ class TarifsAlter extends Migration
             $table->uuid('team_id')->after('id');
             $table->foreign('team_id')
                 ->references('id')
-                ->on('teams_subscriptions');
+                ->on('teams');
         });
     }
 
