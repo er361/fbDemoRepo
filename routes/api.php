@@ -34,12 +34,12 @@ Route::middleware('auth:api')->group(function () {
         Route::put('{id}/change-password', [UserController::class, 'changePassword']);
     });
 
-    Route::prefix('accounts')->group(function () {
+    Route::prefix('fbAccounts')->group(function () {
         Route::delete('delete-bulk', [AccountController::class, 'deleteBulk']);
         Route::put('archive-bulk', [AccountController::class, 'archiveBulk']);
         Route::put('unarchive-bulk', [AccountController::class, 'unArchiveBulk']);
     });
-    Route::apiResource('accounts', AccountController::class);
+    Route::apiResource('fbAccounts', AccountController::class);
 
     Route::prefix('proxy')->group(function () {
         Route::delete('delete-bulk', [ProxyController::class, 'deleteBulk']);

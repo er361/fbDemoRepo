@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FbAccount extends Model
 {
-    use HasFactory, Uuid, SoftDeletes;
+    use HasFactory, SoftDeletes;
+
+    use Uuid;
 
     protected $fillable = [
         'user_id',
@@ -21,7 +23,8 @@ class FbAccount extends Model
         'password',
         'user_agent',
         'cookies',
-        'archived'
+        'archived',
+        'notes'
     ];
 
     public function tags()
