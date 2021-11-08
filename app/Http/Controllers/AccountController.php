@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Resources\FbAccountResource;
 use App\Models\FbAccount;
 use App\Models\Proxy;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -42,7 +44,7 @@ class AccountController extends Controller
             'tags.*' => 'string',
             'proxy_id' => 'uuid',
             'proxy' => 'array',
-            'proxy.port' => 'integer',
+            'proxy.port' => 'required_with:proxy|integer',
             'proxy.type' => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
             'proxy.name' => 'required_with:proxy|string',
             'proxy.host' => 'required_with:proxy|string',
@@ -61,15 +63,7 @@ class AccountController extends Controller
 
 
         if ($request->has('proxy')) {
-            $proxyData = array_merge(
-                $request->get('proxy'),
-                [
-                    'user_id' => Auth::id(),
-                    'team_id' => Auth::user()->team->id
-                ]
-            );
-
-            $proxy = Proxy::query()->create($proxyData);
+            $proxy = $this->createProxy($request);
             $account->proxy()->associate($proxy);
         }
 
@@ -95,11 +89,41 @@ class AccountController extends Controller
      *
      * @param \Illuminate\Http\Request $request
      * @param \App\Models\FbAccount $fbAccount
-     * @return \Illuminate\Http\Response
+     * @return FbAccountResource
      */
     public function update(Request $request, FbAccount $fbAccount)
     {
         //
+        $this->validate($request, [
+            'name' => 'string|max:255',
+            'useragent' => 'string',
+            'tags' => 'array',
+            'tags.*' => 'string',
+            'access_token' => 'string',
+            'business_access_token' => 'string',
+            'notes' => 'string', //todo sanitize
+            'proxy_id' => 'uuid',
+            'proxy' => 'array',
+            'proxy.port' => 'required_with:proxy|integer',
+            'proxy.type' => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
+            'proxy.name' => 'required_with:proxy|string',
+            'proxy.host' => 'required_with:proxy|string',
+            'proxy.login' => 'required_with:proxy|string',
+        ]);
+
+
+        if ($request->has('proxy')) {
+            $proxy = $this->createProxy($request);
+            $fbAccount->proxy()->associate($proxy);
+        }
+
+        $tags = $this->createTags($request);
+
+        $fbAccount->tags()->createMany($tags);
+        $fbAccount->update($request->all());
+        $fbAccount->refresh();
+
+        return new FbAccountResource($fbAccount->load('proxy', 'tags'));
     }
 
     public function addTags(Request $request)
@@ -198,5 +222,23 @@ class AccountController extends Controller
                 'team_id' => Auth::user()->team->id
             ]);
         return $tags;
+    }
+
+    /**
+     * @param Request $request
+     * @return Builder|Model
+     */
+    public function createProxy(Request $request): Builder|Model
+    {
+        $proxyData = array_merge(
+            $request->get('proxy'),
+            [
+                'user_id' => Auth::id(),
+                'team_id' => Auth::user()->team->id
+            ]
+        );
+
+        $proxy = Proxy::query()->create($proxyData);
+        return $proxy;
     }
 }
