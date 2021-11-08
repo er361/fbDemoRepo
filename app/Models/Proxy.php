@@ -26,4 +26,9 @@ class Proxy extends Model
         'change_ip_url',
         'expiration_date',
     ];
+
+    public function tags()
+    {
+        return $this->hasMany(ProxyTag::class);
+    }
 }

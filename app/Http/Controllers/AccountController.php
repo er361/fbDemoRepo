@@ -102,6 +102,56 @@ class AccountController extends Controller
         //
     }
 
+    public function addTags(Request $request)
+    {
+        $this->validate($request, [
+            'ids' => 'array|required',
+            'ids.*' => 'uuid',
+            'tags' => 'array|required',
+            'tags.*.name' => 'string|max:255'
+        ]);
+
+        $tags = collect($request->get('tags'))->transform(fn($tag) => [
+            'name' => $tag['name'],
+            'team_id' => Auth::user()->team_id
+        ]);
+
+
+        FbAccount::query()->whereIn('id', $request->get('ids'))
+            ->each(function ($account) use ($request, $tags) {
+                /**
+                 * @var $account FbAccount
+                 */
+                $accountTagsNames = $account->tags()->pluck('name');
+                $tags->each(function ($tag) use ($accountTagsNames, $account) {
+                    if (!in_array($tag['name'], $accountTagsNames->toArray())) {
+                        $account->tags()->create($tag);
+                    }
+                });
+            });
+    }
+
+    public function removeTags(Request $request)
+    {
+        $this->validate($request, [
+            'ids' => 'array|required',
+            'ids.*' => 'uuid',
+            'tags' => 'array|required',
+            'tags.*.name' => 'string|max:255'
+        ]);
+        $tags = collect($request->get('tags'));
+        FbAccount::query()->whereIn('id', $request->get('ids'))
+            ->each(function ($account) use ($request, $tags) {
+                /**
+                 * @var $account FbAccount
+                 */
+
+                $account->tags()
+                    ->whereIn('name', $tags->pluck('name')->toArray())
+                    ->delete();
+            });
+    }
+
     public function deleteBulk(Request $request)
     {
         $this->validate($request, [
@@ -119,11 +169,9 @@ class AccountController extends Controller
             'ids' => 'array|required',
             'ids.*' => 'uuid'
         ]);
-//        DB::enableQueryLog();
         FbAccount::query()->whereIn('id', $request->get('ids'))
             ->where('user_id', Auth::id())
             ->update(['archived' => true]);
-//        dd(DB::getQueryLog());
     }
 
     public function unArchiveBulk(Request $request)

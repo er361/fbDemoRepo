@@ -38,6 +38,8 @@ Route::middleware('auth:api')->group(function () {
         Route::delete('delete-bulk', [AccountController::class, 'deleteBulk']);
         Route::put('archive-bulk', [AccountController::class, 'archiveBulk']);
         Route::put('unarchive-bulk', [AccountController::class, 'unArchiveBulk']);
+        Route::post('add-tags', [AccountController::class, 'addTags']);
+        Route::delete('remove-tags', [AccountController::class, 'removeTags']);
     });
     Route::apiResource('accounts', AccountController::class);
 
