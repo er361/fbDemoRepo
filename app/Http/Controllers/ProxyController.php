@@ -6,8 +6,13 @@ use App\Http\Requests\ListRequest;
 use App\Http\Resources\ProxyResource;
 use App\Models\FbAccount;
 use App\Models\Proxy;
+use App\Rules\IpOrDNS;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
+use Illuminate\Support\Facades\Validator;
+
+use function Symfony\Component\Translation\t;
 
 class ProxyController extends Controller
 {
@@ -75,11 +80,23 @@ class ProxyController extends Controller
      * @param \Illuminate\Http\Request $request
      * @param \App\Models\Proxy $proxy
      *
-     * @return \Illuminate\Http\Response
+     * @return ProxyResource
      */
     public function update(Request $request, Proxy $proxy)
     {
         //
+        $validatedData = $this->validate($request, [
+            'type' => 'string|in:http,https,socks5,socks4,ssh',
+            'name' => 'string',
+            'host' => 'string',
+            'port' => 'integer',
+            'change_ip_url' => 'string'
+        ]);
+
+        $proxy->update($validatedData);
+        $proxy->refresh();
+
+        return new ProxyResource($proxy);
     }
 
     public function deleteBulk(Request $request)
