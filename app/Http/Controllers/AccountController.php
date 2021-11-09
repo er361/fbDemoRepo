@@ -137,12 +137,11 @@ class AccountController extends Controller
      * @param \App\Models\FbAccount $fbAccount
      * @return \Illuminate\Http\Response
      */
-    public
-    function show(
-        FbAccount $fbAccount
-    ) {
-        //
-    }
+//    public function show(
+//        FbAccount $fbAccount
+//    ) {
+//        //
+//    }
 
     /**
      * Update the specified resource in storage.
@@ -151,11 +150,8 @@ class AccountController extends Controller
      * @param \App\Models\FbAccount $fbAccount
      * @return FbAccountResource
      */
-    public
-    function update(
-        Request $request,
-        FbAccount $fbAccount
-    ) {
+    public function update(Request $request, FbAccount $fbAccount)
+    {
         //
         $this->validate($request, [
             'name' => 'string|max:255',

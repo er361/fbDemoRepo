@@ -32,7 +32,7 @@ class AccountDeleteBulkTest extends TestCase
 
         // удалить их
         $response = $this->delete(
-            '/api/accounts/delete-bulk',
+            '/api/fb-accounts/delete-bulk',
             ['ids' => [$accountToDelete1->id, $accountToDelete2->id]],
             $this->headers
         );

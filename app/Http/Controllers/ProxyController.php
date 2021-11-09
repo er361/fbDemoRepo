@@ -41,12 +41,12 @@ class ProxyController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'type'          => 'string|required|in:http,https,socks5,socks4,ssh',
-            'name'          => 'string',
-            'host'          => 'required|string',
-            'port'          => 'required|integer',
-            'login'         => 'string',
-            'password'      => 'string',
+            'type' => 'string|required|in:http,https,socks5,socks4,ssh',
+            'name' => 'string',
+            'host' => 'required|string',
+            'port' => 'required|integer',
+            'login' => 'string',
+            'password' => 'string',
             'change_ip_url' => 'string'
         ]);
 
@@ -61,6 +61,36 @@ class ProxyController extends Controller
         );
 
         return new ProxyResource($proxy);
+    }
+
+    public function import(Request $request)
+    {
+        $this->validate($request, [
+            'proxies' => 'required|array',
+            'proxies.*.type' => 'string|required|in:http,https,socks5,socks4,ssh',
+            'proxies.*.name' => 'string',
+            'proxies.*.host' => 'required|string',
+            'proxies.*.port' => 'required|integer',
+            'proxies.*.login' => 'string',
+            'proxies.*.password' => 'string',
+            'proxies.*.change_ip_url' => 'string'
+        ]);
+
+        $request->collect('proxies')->each(function ($proxy) {
+            Proxy::query()->create(
+                array_merge(
+                    $proxy,
+                    [
+                        'user_id' => Auth::id(),
+                        'team_id' => Auth::user()->team_id
+                    ]
+                )
+            );
+        });
+
+        return \response()->json([
+            'status' => true
+        ], 201);
     }
 
 
@@ -80,7 +110,7 @@ class ProxyController extends Controller
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param Proxy   $proxy
+     * @param Proxy $proxy
      *
      * @return ProxyResource
      */
@@ -88,10 +118,10 @@ class ProxyController extends Controller
     {
         //
         $validatedData = $this->validate($request, [
-            'type'          => 'string|in:http,https,socks5,socks4,ssh',
-            'name'          => 'string',
-            'host'          => 'string',
-            'port'          => 'integer',
+            'type' => 'string|in:http,https,socks5,socks4,ssh',
+            'name' => 'string',
+            'host' => 'string',
+            'port' => 'integer',
             'change_ip_url' => 'string'
         ]);
 
@@ -104,7 +134,7 @@ class ProxyController extends Controller
     public function deleteBulk(Request $request)
     {
         $this->validate($request, [
-            'ids'   => 'array|required',
+            'ids' => 'array|required',
             'ids.*' => 'uuid'
         ]);
 
