@@ -12,6 +12,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 
 use function Symfony\Component\Translation\t;
@@ -91,6 +92,20 @@ class ProxyController extends Controller
         return \response()->json([
             'status' => true
         ], 201);
+    }
+
+    public function check(Request $request, Proxy $proxy)
+    {
+        if (!$proxy->check()) {
+            abort(400, 'check fail');
+        }
+
+        return \response()->json([
+            'data' => [
+                'success' => true,
+                'external_ip' => $proxy->external_ip
+            ]
+        ]);
     }
 
 

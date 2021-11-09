@@ -64,5 +64,6 @@ Route::apiResource('fb-accounts', FbController::class);
 Route::prefix('proxy')->group(function () {
     Route::delete('delete-bulk', [ProxyController::class, 'deleteBulk']);
     Route::post('import', [ProxyController::class, 'import']);
+    Route::get('{proxy}/check', [ProxyController::class, 'check']);
 });
 Route::apiResource('proxy', ProxyController::class);
