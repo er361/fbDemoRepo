@@ -12,7 +12,7 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    public function jsonError($status = 200, $errors = '')
+    public function jsonError($status = 400, $errors = '')
     {
         return response()->json([
             'errors' => $errors

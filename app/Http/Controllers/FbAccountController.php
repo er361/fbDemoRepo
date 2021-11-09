@@ -94,7 +94,7 @@ class FbAccountController extends Controller
      *
      * @param Request $request
      *
-     * @return FbAccountResource
+     * @return FbAccountResource|\Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
