@@ -106,11 +106,12 @@ class AccountController extends Controller
             'tags.*'                => 'string',
             'proxy_id'              => 'uuid',
             'proxy'                 => 'array',
-            'proxy.port'            => 'required_with:proxy|integer',
             'proxy.type'            => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
-            'proxy.name'            => 'required_with:proxy|string',
             'proxy.host'            => 'required_with:proxy|string',
-            'proxy.login'           => 'required_with:proxy|string',
+            'proxy.port'            => 'required_with:proxy|integer',
+            'proxy.name'            => 'string',
+            'proxy.login'           => 'string',
+            'proxy.password'        => 'string',
         ]);
 
         $account = FbAccount::query()->create(
@@ -350,10 +351,8 @@ class AccountController extends Controller
      *
      * @return Builder|Model
      */
-    public
-    function createProxy(
-        Request $request
-    ): Builder|Model {
+    public function createProxy(Request $request): Builder|Model
+    {
         $proxyData = array_merge(
             $request->get('proxy'),
             [
