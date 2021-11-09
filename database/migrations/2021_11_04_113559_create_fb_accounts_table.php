@@ -18,6 +18,7 @@ class CreateFbAccountsTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('user_id');
             $table->uuid('team_id');
+            $table->uuid('proxy_id')->nullable();
             $table->string('name')->index();
 
             $table->text('notes')->nullable();
@@ -52,6 +53,10 @@ class CreateFbAccountsTable extends Migration
             $table->foreign('team_id')
                 ->references('id')
                 ->on('teams');
+
+            $table->foreign('proxy_id')
+                ->references('id')
+                ->on('proxy');
         });
 
 //        DB::statement('alter table fb_accounts TRANSACTIONAL=1');
