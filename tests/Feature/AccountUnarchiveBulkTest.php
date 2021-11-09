@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class AccountArchiveTest extends TestCase
+class AccountUnarchiveBulkTest extends TestCase
 {
     use DatabaseTransactions, WithFaker;
 
@@ -20,17 +20,22 @@ class AccountArchiveTest extends TestCase
         ];
     }
 
-    public function test_successful_archive()
+    public function test_successful_unarchive()
     {
-        $accountToArchive = FbAccount::where('name', 'accountToArchive')
+        $accountToUnarchive = FbAccount::where('name', 'accountToUnarchive')
             ->select('id')
             ->first();
 
         $response = $this->put(
-            '/api/accounts/archive-bulk',
-            ['ids' => [$accountToArchive->id]],
+            '/api/accounts/unarchive-bulk',
+            ['ids' => [$accountToUnarchive->id]],
             $this->headers
         );
+
+        $accountToUnarchive = FbAccount::where('name', 'accountToUnarchive')
+            ->first();
+
+        $this->assertEquals(0, $accountToUnarchive->archived, 'archived attribute should be 0');
 
         $response->assertStatus(200);
         $response->assertJsonPath('success', true);

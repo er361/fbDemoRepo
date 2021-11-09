@@ -40,5 +40,21 @@ class FbAccountSeeder extends Seeder
             'status'       => 'ACTIVE',
             'archived'     => true
         ]);
+
+        // аккаунты для теста удаления
+        FbAccount::create([
+            'team_id'      => $user->team_id,
+            'user_id'      => $user->id,
+            'name'         => 'accountToDelete2',
+            'access_token' => 'aaa',
+            'status'       => 'ACTIVE',
+        ]);
+        FbAccount::create([
+            'team_id'      => $user->team_id,
+            'user_id'      => $user->id,
+            'name'         => 'accountToDelete1',
+            'access_token' => 'aaa',
+            'status'       => 'ACTIVE',
+        ]);
     }
 }
