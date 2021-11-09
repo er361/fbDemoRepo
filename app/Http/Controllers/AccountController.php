@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\FbAccountResource;
 use App\Models\FbAccount;
+use App\Models\Proxy;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AccountController extends Controller
 {
@@ -15,10 +19,10 @@ class AccountController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-//    public function index()
-//    {
-//        //
-//    }
+    public function index()
+    {
+        //
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -33,11 +37,6 @@ class AccountController extends Controller
             'name'                  => 'required|string',
             'access_token'          => 'required|string',
             'business_access_token' => 'string',
-            'password'              => 'string',
-            'user_agent'            => 'string',
-            'cookies'               => 'json',
-            'tags'                  => 'array',
-            'tags.*'                => 'string',
             'password' => 'string',
             'user_agent' => 'string',
             'cookies' => 'json',
@@ -45,7 +44,7 @@ class AccountController extends Controller
             'tags.*' => 'string',
             'proxy_id' => 'uuid',
             'proxy' => 'array',
-            'proxy.port' => 'integer',
+            'proxy.port' => 'required_with:proxy|integer',
             'proxy.type' => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
             'proxy.name' => 'required_with:proxy|string',
             'proxy.host' => 'required_with:proxy|string',
@@ -64,15 +63,7 @@ class AccountController extends Controller
 
 
         if ($request->has('proxy')) {
-            $proxyData = array_merge(
-                $request->get('proxy'),
-                [
-                    'user_id' => Auth::id(),
-                    'team_id' => Auth::user()->team->id
-                ]
-            );
-
-            $proxy = Proxy::query()->create($proxyData);
+            $proxy = $this->createProxy($request);
             $account->proxy()->associate($proxy);
         }
 
@@ -86,26 +77,135 @@ class AccountController extends Controller
      * Display the specified resource.
      *
      * @param \App\Models\FbAccount $fbAccount
-     *
      * @return \Illuminate\Http\Response
      */
-//    public function show(FbAccount $fbAccount)
-//    {
-//        //
-//    }
+    public function show(FbAccount $fbAccount)
+    {
+        //
+    }
 
     /**
      * Update the specified resource in storage.
      *
      * @param \Illuminate\Http\Request $request
-     * @param \App\Models\FbAccount    $fbAccount
-     *
-     * @return \Illuminate\Http\Response
+     * @param \App\Models\FbAccount $fbAccount
+     * @return FbAccountResource
      */
-//    public function update(Request $request, FbAccount $fbAccount)
-//    {
-//        //
-//    }
+    public function update(Request $request, FbAccount $fbAccount)
+    {
+        //
+        $this->validate($request, [
+            'name' => 'string|max:255',
+            'useragent' => 'string',
+            'tags' => 'array',
+            'tags.*' => 'string',
+            'access_token' => 'string',
+            'business_access_token' => 'string',
+            'notes' => 'string', //todo sanitize
+            'proxy_id' => 'uuid',
+            'proxy' => 'array',
+            'proxy.port' => 'required_with:proxy|integer',
+            'proxy.type' => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
+            'proxy.name' => 'required_with:proxy|string',
+            'proxy.host' => 'required_with:proxy|string',
+            'proxy.login' => 'required_with:proxy|string',
+        ]);
+
+
+        if ($request->has('proxy')) {
+            $proxy = $this->createProxy($request);
+            $fbAccount->proxy()->associate($proxy);
+        }
+
+        $tags = $this->createTags($request);
+
+        $fbAccount->tags()->createMany($tags);
+        $fbAccount->update($request->all());
+        $fbAccount->refresh();
+
+        return new FbAccountResource($fbAccount->load('proxy', 'tags'));
+    }
+
+    public function changeProxy(Request $request)
+    {
+        $this->validate($request, [
+            'ids' => 'array|required',
+            'ids.*' => 'uuid',
+            'proxy_id' => 'uuid|required_without:proxy',
+            'proxy' => 'array|required_without:proxy_id',
+            'proxy.port' => 'required_with:proxy|integer',
+            'proxy.type' => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
+            'proxy.name' => 'required_with:proxy|string',
+            'proxy.host' => 'required_with:proxy|string',
+            'proxy.login' => 'required_with:proxy|string',
+        ]);
+
+        FbAccount::query()->whereIn('id', $request->get('ids'))
+            ->each(function ($account) use ($request) {
+                /**
+                 * @var $account FbAccount
+                 */
+                if ($request->has('proxy_id')) {
+                    $account->proxy_id = $request->get('proxy_id');
+                }
+
+                if ($request->has('proxy')) {
+                    $proxy = $this->createProxy($request);
+                    $account->proxy()->associate($proxy);
+                }
+                $account->save();
+            });
+    }
+
+    public function addTags(Request $request)
+    {
+        $this->validate($request, [
+            'ids' => 'array|required',
+            'ids.*' => 'uuid',
+            'tags' => 'array|required',
+            'tags.*.name' => 'string|max:255'
+        ]);
+
+        $tags = collect($request->get('tags'))->transform(fn($tag) => [
+            'name' => $tag['name'],
+            'team_id' => Auth::user()->team_id
+        ]);
+
+
+        FbAccount::query()->whereIn('id', $request->get('ids'))
+            ->each(function ($account) use ($request, $tags) {
+                /**
+                 * @var $account FbAccount
+                 */
+                $accountTagsNames = $account->tags()->pluck('name');
+                $tags->each(function ($tag) use ($accountTagsNames, $account) {
+                    if (!in_array($tag['name'], $accountTagsNames->toArray())) {
+                        $account->tags()->create($tag);
+                    }
+                });
+            });
+    }
+
+    public function removeTags(Request $request)
+    {
+        $this->validate($request, [
+            'ids' => 'array|required',
+            'ids.*' => 'uuid',
+            'tags' => 'array|required',
+            'tags.*.name' => 'string|max:255'
+        ]);
+        $tags = collect($request->get('tags'));
+        FbAccount::query()->whereIn('id', $request->get('ids'))
+            ->each(function ($account) use ($request, $tags) {
+                /**
+                 * @var $account FbAccount
+                 */
+
+                $account->tags()
+                    ->whereIn('name', $tags->pluck('name')->toArray())
+                    ->delete();
+            });
+    }
 
     public function deleteBulk(Request $request)
     {
@@ -124,11 +224,9 @@ class AccountController extends Controller
             'ids' => 'array|required',
             'ids.*' => 'uuid'
         ]);
-//        DB::enableQueryLog();
         FbAccount::query()->whereIn('id', $request->get('ids'))
             ->where('user_id', Auth::id())
             ->update(['archived' => true]);
-//        dd(DB::getQueryLog());
     }
 
     public function unArchiveBulk(Request $request)
@@ -144,15 +242,9 @@ class AccountController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
      * @param Request $request
      * @return \Illuminate\Support\Collection
      */
-//    public function destroy(FbAccount $fbAccount)
-//    {
-//        //
-//    }
     public function createTags(Request $request): \Illuminate\Support\Collection
     {
         $tags = collect($request->get('tags'))
@@ -161,5 +253,23 @@ class AccountController extends Controller
                 'team_id' => Auth::user()->team->id
             ]);
         return $tags;
+    }
+
+    /**
+     * @param Request $request
+     * @return Builder|Model
+     */
+    public function createProxy(Request $request): Builder|Model
+    {
+        $proxyData = array_merge(
+            $request->get('proxy'),
+            [
+                'user_id' => Auth::id(),
+                'team_id' => Auth::user()->team->id
+            ]
+        );
+
+        $proxy = Proxy::query()->create($proxyData);
+        return $proxy;
     }
 }
