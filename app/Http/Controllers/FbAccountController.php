@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ListRequest;
 use App\Http\Resources\FbAccountResource;
 use App\Models\FbAccount;
 use App\Models\Proxy;
@@ -15,14 +16,14 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class FbController extends Controller
+class FbAccountController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return AnonymousResourceCollection
      */
-    public function index(Request $request)
+    public function index(ListRequest $request)
     {
         //
         $this->validate($request, [
@@ -30,31 +31,38 @@ class FbController extends Controller
             'sort.name' => 'in:asc,desc',
             'sort.status' => 'in:asc,desc',
             'filters' => 'array',
-            'filters.status' => 'in:NEW,TOKEN_ERROR,ACTIVE',
+            'filters.status' => 'in:new,token_error,active',
             'filters.archived' => 'boolean',
             'filters.user_id' => 'array',
             'filters.user_id.*' => 'uuid',
             'filters.name' => 'string|max:255',
             'filters.tags' => 'array',
-            'filters.tags.*' => 'string|max:255',
-            'perPage' => 'integer'
+            'filters.tags.*' => 'string|max:255'
         ]);
-
         $accounts = FbAccount::query()
             ->when($request->has('sort'), function (Builder $query) use ($request) {
-                $query->when(
-                    $request->has('sort.name'),
-                    fn($q) => $q->orderBy('name', $request->input('sort.name'))
-                )->when(
-                    $request->has('sort.status'),
-                    fn($q) => $q->orderBy('status', $request->input('sort.status'))
-                );
+                if ($request->has('sort.name')) {
+                    $query->orderBy('name', $request->input('sort.name'));
+                } else {
+                    if ($request->has('sort.status')) {
+                        $query->orderBy('status', $request->input('sort.status'));
+                    }
+                }
             })->when($request->has('filters'), function (Builder $query) use ($request) {
                 //status
                 $query->when(
                     $request->has('filters.status'),
                     fn(Builder $q) => $q->where('status', $request->input('filters.status'))
                 );
+
+                //name
+                $query->when(
+                    $request->has('filters.name'),
+                    fn(Builder $q) => $q->whereRaw(
+                        sprintf("match(name) against('%s')", $request->input('filters.name'))
+                    )
+                );
+
                 //archived
                 $query->when(
                     $request->has('filters.archived'),
@@ -65,13 +73,7 @@ class FbController extends Controller
                     $request->has('filters.user_id'),
                     fn(Builder $q) => $q->whereIn('user_id', $request->input('filters.user_id'))
                 );
-                //name
-                $query->when(
-                    $request->has('filters.name'),
-                    fn(Builder $q) => $q->whereRaw(
-                        sprintf("match(name) against('%s')", $request->input('filters.name'))
-                    )
-                );
+
                 //tags
                 $query->when(
                     $request->has('filters.tags'),
@@ -80,7 +82,7 @@ class FbController extends Controller
                         fn(Builder $q) => $q->whereIn('name', $request->input('filters.tags'))
                     )
                 );
-            })->paginate($request->get('perPage'));
+            })->paginate($request->get('perPage', 10));
 
         return FbAccountResource::collection($accounts);
     }

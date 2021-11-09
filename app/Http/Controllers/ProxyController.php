@@ -28,7 +28,7 @@ class ProxyController extends Controller
     public function index(ListRequest $request)
     {
         $proxies = Proxy::query()->where('user_id', Auth::id())
-            ->paginate($request->get('perPage'));
+            ->paginate($request->get('perPage', 10));
 
         return ProxyResource::collection($proxies);
     }

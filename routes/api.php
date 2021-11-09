@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\FbController;
+use App\Http\Controllers\FbAccountController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProxyController;
 use App\Http\Controllers\UserController;
@@ -47,14 +47,14 @@ Route::middleware('auth:api')->group(function () {
  *
  * */
 Route::prefix('fb-accounts')->group(function () {
-    Route::delete('delete-bulk', [FbController::class, 'deleteBulk']);
-    Route::put('archive-bulk', [FbController::class, 'archiveBulk']);
-    Route::put('unarchive-bulk', [FbController::class, 'unArchiveBulk']);
-    Route::post('add-tags', [FbController::class, 'addTags']);
-    Route::delete('remove-tags', [FbController::class, 'removeTags']);
-    Route::put('change-proxy', [FbController::class, 'changeProxy']);
+    Route::delete('delete-bulk', [FbAccountController::class, 'deleteBulk']);
+    Route::put('archive-bulk', [FbAccountController::class, 'archiveBulk']);
+    Route::put('unarchive-bulk', [FbAccountController::class, 'unArchiveBulk']);
+    Route::post('add-tags', [FbAccountController::class, 'addTags']);
+    Route::delete('remove-tags', [FbAccountController::class, 'removeTags']);
+    Route::put('change-proxy', [FbAccountController::class, 'changeProxy']);
 });
-Route::apiResource('fb-accounts', FbController::class);
+Route::apiResource('fb-accounts', FbAccountController::class);
 
 
 /*
