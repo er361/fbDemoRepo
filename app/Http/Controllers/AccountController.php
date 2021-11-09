@@ -166,7 +166,7 @@ class AccountController extends Controller
         //
         $this->validate($request, [
             'name'                  => 'string|max:255',
-            'useragent'             => 'string',
+            'user_agent'            => 'string',
             'tags'                  => 'array',
             'tags.*'                => 'string',
             'access_token'          => 'string',
@@ -174,11 +174,12 @@ class AccountController extends Controller
             'notes'                 => 'string', //todo sanitize
             'proxy_id'              => 'uuid',
             'proxy'                 => 'array',
-            'proxy.port'            => 'required_with:proxy|integer',
             'proxy.type'            => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
-            'proxy.name'            => 'required_with:proxy|string',
+            'proxy.port'            => 'required_with:proxy|integer',
             'proxy.host'            => 'required_with:proxy|string',
-            'proxy.login'           => 'required_with:proxy|string',
+            'proxy.name'            => 'string',
+            'proxy.login'           => 'string',
+            'proxy.password'        => 'string',
         ]);
 
 

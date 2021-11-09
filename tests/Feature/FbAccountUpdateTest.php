@@ -43,7 +43,7 @@ class FbAccountUpdateTest extends TestCase
         $response->assertJsonPath('data.name', $data['name']);
     }
 
-    public function test_update_new_proxy()
+    public function test_update_new_proxy_with_auth()
     {
         $accountToUpdate = FbAccount::where('name', 'accountToUpdate')
             ->first();
@@ -75,6 +75,34 @@ class FbAccountUpdateTest extends TestCase
         $this->assertEquals('newProxyForAccount', $newProxy->name);
         $this->assertEquals('login', $newProxy->login);
         $this->assertEquals('password', $newProxy->password);
+    }
+
+    public function test_update_new_proxy_without_auth_and_name()
+    {
+        $accountToUpdate = FbAccount::where('name', 'accountToUpdate')
+            ->first();
+
+        $data = [
+            'proxy' => [
+                'type' => 'http',
+                'host' => '1.1.1.1',
+                'port' => 8080,
+            ]
+        ];
+
+        $response = $this->put(
+            "/api/fb-accounts/{$accountToUpdate->id}",
+            $data,
+            $this->headers
+        );
+
+        $response->assertStatus(200);
+        $this->assertNotEmpty($response->json()['data']['proxy_id']);
+
+        $newProxy = Proxy::find($response->json()['data']['proxy_id']);
+        $this->assertEquals('1.1.1.1', $newProxy->host);
+        $this->assertEquals(8080, $newProxy->port);
+        $this->assertEquals('http', $newProxy->type);
     }
 
     public function test_update_user_agent()
@@ -171,6 +199,34 @@ class FbAccountUpdateTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertJsonPath('data.proxy_id', $data['proxy_id']);
+    }
+
+    // использование proxy_id невозможно с использованием proxy и наоборот
+    public function test_update_proxy_id_with_proxy_field()
+    {
+        $accountToUpdate = FbAccount::where('name', 'accountToUpdate')
+            ->first();
+        $someProxy = Proxy::query()->first();
+
+        $data = [
+            'proxy_id' => $someProxy->id,
+            'proxy'    => [
+                'type'     => 'http',
+                'host'     => '1.1.1.1',
+                'port'     => 8080,
+                'name'     => 'newProxyForAccount',
+                'login'    => 'login',
+                'password' => 'password'
+            ]
+        ];
+
+        $response = $this->put(
+            "/api/fb-accounts/{$accountToUpdate->id}",
+            $data,
+            $this->headers
+        );
+
+        $response->assertStatus(422);
     }
 
     public function test_update_tags()
