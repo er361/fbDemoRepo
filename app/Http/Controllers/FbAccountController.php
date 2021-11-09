@@ -15,6 +15,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class FbAccountController extends Controller
 {
@@ -39,6 +40,7 @@ class FbAccountController extends Controller
             'filters.tags' => 'array',
             'filters.tags.*' => 'string|max:255'
         ]);
+
         $accounts = FbAccount::query()
             ->when($request->has('sort'), function (Builder $query) use ($request) {
                 if ($request->has('sort.name')) {
@@ -82,7 +84,7 @@ class FbAccountController extends Controller
                         fn(Builder $q) => $q->whereIn('name', $request->input('filters.tags'))
                     )
                 );
-            })->paginate($request->get('perPage', 10));
+            })->where('user_id', Auth::id())->paginate($request->get('perPage', 10));
 
         return FbAccountResource::collection($accounts);
     }
@@ -97,7 +99,7 @@ class FbAccountController extends Controller
     public function store(Request $request)
     {
         //
-        $this->validate($request, [
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'access_token' => 'required|string',
             'business_access_token' => 'string',
@@ -117,6 +119,14 @@ class FbAccountController extends Controller
             'proxy.password' => 'string',
         ]);
 
+        if ($validator->fails()) {
+            return $this->jsonError(422, $validator->errors());
+        }
+
+        if ($request->has('proxy_id') && $request->has('proxy')) {
+            return $this->jsonError(422, 'Нельзя использовать proxy_id вместе с proxy');
+        }
+
         $account = FbAccount::query()->create(
             array_merge(
                 $request->all(),
@@ -133,7 +143,6 @@ class FbAccountController extends Controller
         }
 
         $tags = $this->createTags($request);
-
         $account->tags()->createMany($tags);
         return new FbAccountResource($account->load('tags', 'proxy'));
     }
@@ -162,7 +171,7 @@ class FbAccountController extends Controller
     public function update(Request $request, FbAccount $fbAccount)
     {
         //
-        $this->validate($request, [
+        $validator = Validator::make($request->all(), [
             'name' => 'string|max:255',
             'user_agent' => 'string',
             'tags' => 'array',
@@ -180,15 +189,22 @@ class FbAccountController extends Controller
             'proxy.password' => 'string',
         ]);
 
+        if ($validator->fails()) {
+            return $this->jsonResponse(422, $validator->errors());
+        }
+
+        if ($request->has('proxy_id') && $request->has('proxy')) {
+            return $this->jsonResponse(422, 'нельзя использовать proxy_id вместе с proxy');
+        }
+
 
         if ($request->has('proxy')) {
             $proxy = $this->createProxy($request);
             $fbAccount->proxy()->associate($proxy);
         }
 
-        $tags = $this->createTags($request);
+        $this->updateTags($request, $fbAccount);
 
-        $fbAccount->tags()->createMany($tags);
         $fbAccount->update($request->all());
         $fbAccount->refresh();
 
@@ -313,10 +329,8 @@ class FbAccountController extends Controller
         ]);
     }
 
-    public
-    function unArchiveBulk(
-        Request $request
-    ) {
+    public function unArchiveBulk(Request $request)
+    {
         $this->validate($request, [
             'ids' => 'array|required',
             'ids.*' => 'uuid'
@@ -334,10 +348,8 @@ class FbAccountController extends Controller
      *
      * @return Collection
      */
-    public
-    function createTags(
-        Request $request
-    ): Collection {
+    public function createTags(Request $request): Collection
+    {
         $tags = collect($request->get('tags'))
             ->transform(fn($tag) => [
                 'name' => $tag,
@@ -363,5 +375,16 @@ class FbAccountController extends Controller
 
         $proxy = Proxy::query()->create($proxyData);
         return $proxy;
+    }
+
+    /**
+     * @param Request $request
+     * @param FbAccount $fbAccount
+     */
+    public function updateTags(Request $request, FbAccount $fbAccount): void
+    {
+        $tags = $this->createTags($request);
+        $fbAccount->tags()->delete();
+        $fbAccount->tags()->createMany($tags);
     }
 }
