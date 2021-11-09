@@ -15,8 +15,9 @@ class TarifsAlter extends Migration
     {
         Schema::rename('tarifs', 'teams_subscriptions');
         Schema::table('teams_subscriptions', function (Blueprint $table) {
-            $table->dropColumn('user_id');
+//            $table->dropColumn('user_id');
             $table->uuid('team_id')->after('id');
+//            $table->dropIndex('tarifs_user_id_foreign');
             $table->foreign('team_id')
                 ->references('id')
                 ->on('teams');

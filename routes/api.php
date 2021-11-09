@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('auth')->group(function () {
-
     Route::post('/login', [AuthController::class, 'login'])
         ->middleware('throttle:login');
 
@@ -27,7 +26,6 @@ Route::prefix('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh-token', [AuthController::class, 'refresh']);
-
 });
 
 
@@ -35,12 +33,9 @@ Route::middleware('auth:api')->group(function () {
     Route::prefix('users')->group(function () {
         Route::put('{id}/change-password', [UserController::class, 'changePassword']);
     });
-
-    Route::apiResource('profile', AccountController::class);
 });
 
 Route::middleware('auth:api')->group(function () {
     Route::apiResource('proxy', ProxyController::class);
+    Route::apiResource('accounts', AccountController::class);
 });
-
-

@@ -29,9 +29,7 @@ class CreateFbAccountsTagsTable extends Migration
                 ->references('id')
                 ->on('teams');
         });
-
-
-        DB::statement('alter table fb_accounts_tags TRANSACTIONAL=0');
+//        DB::statement('alter table fb_accounts_tags TRANSACTIONAL=1');
     }
 
     /**

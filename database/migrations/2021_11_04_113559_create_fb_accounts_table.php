@@ -54,7 +54,7 @@ class CreateFbAccountsTable extends Migration
                 ->on('teams');
         });
 
-        DB::statement('alter table fb_accounts TRANSACTIONAL=0');
+//        DB::statement('alter table fb_accounts TRANSACTIONAL=1');
 
         DB::statement('alter table fb_accounts ADD FULLTEXT INDEX idx_ft_notes (notes)');
         DB::statement('alter table fb_accounts ADD FULLTEXT INDEX idx_ft_acc_token (access_token)');

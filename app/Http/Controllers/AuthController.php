@@ -37,7 +37,9 @@ class AuthController extends Controller
         }
 
         if (!$token = Auth::attempt($validator->validated())) {
+            // @codeCoverageIgnoreStart
             return response()->json(['error' => 'Unauthorized'], 401);
+            // @codeCoverageIgnoreEnd
         }
 
         return $this->createNewToken($token);
@@ -60,10 +62,12 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
+        // @codeCoverageIgnoreStart
         $message = $this->checkLimiter($request);
         if ($message) {
             return response()->json(['message' => $message], 429);
         }
+        // @codeCoverageIgnoreEnd
 
         $user = User::create(
             array_merge(
@@ -147,10 +151,12 @@ class AuthController extends Controller
             60 * 60
         );
 
+        // @codeCoverageIgnoreStart
         if (RateLimiter::tooManyAttempts($key, 3)) {
             $seconds = RateLimiter::availableIn($key);
             return 'You may try again in ' . $seconds . ' seconds.';
         }
+        // @codeCoverageIgnoreEnd
         return null;
     }
 

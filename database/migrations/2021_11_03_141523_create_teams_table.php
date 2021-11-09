@@ -26,8 +26,7 @@ class CreateTeamsTable extends Migration
                 ->references('id')
                 ->on('users');
         });
-
-        DB::statement('alter table teams TRANSACTIONAL=0');
+        //DB::statement('alter table teams TRANSACTIONAL=1');
     }
 
     /**

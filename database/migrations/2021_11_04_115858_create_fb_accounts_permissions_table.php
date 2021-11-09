@@ -18,8 +18,11 @@ class CreateFbAccountsPermissionsTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('account_id');
             $table->uuid('team_id');
-            $table->enum('name',[
-                'read','update','delete','stat'
+            $table->enum('name', [
+                'read',
+                'update',
+                'delete',
+                'stat'
             ]);
             $table->timestamps();
 
@@ -31,8 +34,7 @@ class CreateFbAccountsPermissionsTable extends Migration
                 ->references('id')
                 ->on('teams');
         });
-
-        DB::statement('alter table fb_accounts_permissions TRANSACTIONAL=0');
+//        DB::statement('alter table fb_accounts_permissions TRANSACTIONAL=1');
     }
 
     /**
