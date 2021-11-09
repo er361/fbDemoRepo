@@ -126,6 +126,37 @@ class AccountController extends Controller
         return new FbAccountResource($fbAccount->load('proxy', 'tags'));
     }
 
+    public function changeProxy(Request $request)
+    {
+        $this->validate($request, [
+            'ids' => 'array|required',
+            'ids.*' => 'uuid',
+            'proxy_id' => 'uuid|required_without:proxy',
+            'proxy' => 'array|required_without:proxy_id',
+            'proxy.port' => 'required_with:proxy|integer',
+            'proxy.type' => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
+            'proxy.name' => 'required_with:proxy|string',
+            'proxy.host' => 'required_with:proxy|string',
+            'proxy.login' => 'required_with:proxy|string',
+        ]);
+
+        FbAccount::query()->whereIn('id', $request->get('ids'))
+            ->each(function ($account) use ($request) {
+                /**
+                 * @var $account FbAccount
+                 */
+                if ($request->has('proxy_id')) {
+                    $account->proxy_id = $request->get('proxy_id');
+                }
+
+                if ($request->has('proxy')) {
+                    $proxy = $this->createProxy($request);
+                    $account->proxy()->associate($proxy);
+                }
+                $account->save();
+            });
+    }
+
     public function addTags(Request $request)
     {
         $this->validate($request, [
