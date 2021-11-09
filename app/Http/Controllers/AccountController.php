@@ -99,6 +99,7 @@ class AccountController extends Controller
             'name'                  => 'required|string',
             'access_token'          => 'required|string',
             'business_access_token' => 'string',
+            'login'                 => 'string',
             'password'              => 'string',
             'user_agent'            => 'string',
             'cookies'               => 'json',
