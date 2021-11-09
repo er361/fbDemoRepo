@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class AccountArchiveTest extends TestCase
+class AccountUnarchiveTest extends TestCase
 {
     use DatabaseTransactions, WithFaker;
 
@@ -20,14 +20,14 @@ class AccountArchiveTest extends TestCase
         ];
     }
 
-    public function test_successful_archive()
+    public function test_successful_unarchive()
     {
-        $accountToArchive = FbAccount::where('name', 'accountToArchive')
+        $accountToArchive = FbAccount::where('name', 'accountToUnarchive')
             ->select('id')
             ->first();
 
         $response = $this->put(
-            '/api/accounts/archive-bulk',
+            '/api/accounts/unarchive-bulk',
             ['ids' => [$accountToArchive->id]],
             $this->headers
         );

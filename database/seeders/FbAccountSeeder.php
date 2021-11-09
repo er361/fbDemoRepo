@@ -19,14 +19,26 @@ class FbAccountSeeder extends Seeder
             ->where('username', 'cloud@dolphin.ru.com')
             ->first();
 
+        // просто аккаунты :)
         FbAccount::factory()->count(5)->create();
 
+        // аккаунт для теста архивации
         FbAccount::create([
             'team_id'      => $user->team_id,
             'user_id'      => $user->id,
             'name'         => 'accountToArchive',
             'access_token' => 'aaa',
             'status'       => 'ACTIVE'
+        ]);
+
+        // аккаунт для теста разархивации
+        FbAccount::create([
+            'team_id'      => $user->team_id,
+            'user_id'      => $user->id,
+            'name'         => 'accountToUnarchive',
+            'access_token' => 'aaa',
+            'status'       => 'ACTIVE',
+            'archived'     => true
         ]);
     }
 }
