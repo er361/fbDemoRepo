@@ -289,17 +289,20 @@ class AccountController extends Controller
             ->delete();
     }
 
-    public
-    function archiveBulk(
-        Request $request
-    ) {
+    public function archiveBulk(Request $request)
+    {
         $this->validate($request, [
             'ids' => 'array|required',
             'ids.*' => 'uuid'
         ]);
+
         FbAccount::query()->whereIn('id', $request->get('ids'))
             ->where('user_id', Auth::id())
             ->update(['archived' => true]);
+
+        return response()->json([
+            'success' => true
+        ]);
     }
 
     public

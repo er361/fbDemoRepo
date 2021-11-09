@@ -57,10 +57,10 @@ Route::apiResource('fb-accounts', AccountController::class);
  * Прокси
  *
  * */
-Route::apiResource('proxy', ProxyController::class);
 Route::prefix('proxy')->group(function () {
     Route::delete('delete-bulk', [ProxyController::class, 'deleteBulk']);
 });
+Route::apiResource('proxy', ProxyController::class);
 
 
 

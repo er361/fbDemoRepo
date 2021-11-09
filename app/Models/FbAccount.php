@@ -13,22 +13,21 @@ class FbAccount extends Model
 
     use Uuid;
 
-    protected $fillable
-        = [
-            'user_id',
-            'team_id',
-            'proxy_id',
-            'name',
-            'access_token',
-            'business_access_token',
-            'password',
-            'user_agent',
-            'cookies',
-            'archived',
-            'facebook_id',
-            'status',
-            'notes'
-        ];
+    protected $fillable = [
+        'user_id',
+        'team_id',
+        'proxy_id',
+        'name',
+        'access_token',
+        'business_access_token',
+        'password',
+        'user_agent',
+        'cookies',
+        'archived',
+        'facebook_id',
+        'status',
+        'notes'
+    ];
 
     public function tags()
     {

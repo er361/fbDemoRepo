@@ -27,17 +27,14 @@ class AccountArchiveBulkTest extends TestCase
             ->first();
 
         $response = $this->put(
-            '/api/accounts/archive-bulk',
+            '/api/fb-accounts/archive-bulk',
             ['ids' => [$accountToArchive->id]],
             $this->headers
         );
 
-        $accountToArchive = FbAccount::where('name', 'accountToArchive')
-            ->first();
-
-        $this->assertEquals(1, $accountToArchive->archived, 'archived attribute should be 1');
-
         $response->assertStatus(200);
+        $accountToArchive->refresh();
+        $this->assertEquals(1, $accountToArchive->archived, 'archived attribute should be 1');
         $response->assertJsonPath('success', true);
     }
 }
