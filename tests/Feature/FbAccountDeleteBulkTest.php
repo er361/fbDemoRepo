@@ -7,7 +7,10 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class AccountDeleteBulkTest extends TestCase
+/**
+ * @group accounts
+ */
+class FbAccountDeleteBulkTest extends TestCase
 {
     use DatabaseTransactions, WithFaker;
 
@@ -39,15 +42,13 @@ class AccountDeleteBulkTest extends TestCase
         $response->assertStatus(200);
 
         // снова взять их из БД
-        $accountToDelete1 = FbAccount::where('name', 'accountToDelete1')
-            ->first();
-        $accountToDelete2 = FbAccount::where('name', 'accountToDelete2')
-            ->first();
+        $accountToDelete1->refresh();
+        $accountToDelete2->refresh();
 
 
         // проверить факт их удаления
-        $this->assertNotEmpty($accountToDelete1->deleted_at);
-        $this->assertNotEmpty($accountToDelete2->deleted_at);
+        $this->assertSoftDeleted($accountToDelete1);
+        $this->assertSoftDeleted($accountToDelete2);
 
         // проверить ответ API
         $response->assertJsonPath('success', true);

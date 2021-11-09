@@ -27,10 +27,11 @@ class ProxyDeleteBulkTest extends TestCase
     {
         // взять два специально заготовленных прокси
         $proxyToDelete1 = Proxy::where('name', 'proxyToDelete1')
-            ->select('id')
+            ->select(['id', 'deleted_at'])
             ->first();
+
         $proxyToDelete2 = Proxy::where('name', 'proxyToDelete2')
-            ->select('id')
+            ->select(['id', 'deleted_at'])
             ->first();
 
         // удалить их
@@ -42,14 +43,12 @@ class ProxyDeleteBulkTest extends TestCase
         $response->assertStatus(200);
 
         // снова взять их из БД
-        $proxyToDelete1 = Proxy::where('name', 'proxyToDelete1')
-            ->first();
-        $proxyToDelete2 = Proxy::where('name', 'proxyToDelete2')
-            ->first();
+        $proxyToDelete1->refresh();
+        $proxyToDelete2->refresh();
 
         // проверить факт их удаления
-        $this->assertEquals(true, is_null($proxyToDelete1->deleted_at));
-        $this->assertEquals(true, is_null($proxyToDelete2->deleted_at));
+        $this->assertSoftDeleted($proxyToDelete1);
+        $this->assertSoftDeleted($proxyToDelete2);
 
         // проверить ответ API
         $response->assertJsonPath('success', true);

@@ -56,5 +56,15 @@ class FbAccountSeeder extends Seeder
             'access_token' => 'aaa',
             'status'       => 'ACTIVE',
         ]);
+
+        // аккаунт для теста редактирования
+        FbAccount::create([
+            'team_id'      => $user->team_id,
+            'user_id'      => $user->id,
+            'name'         => 'accountToUpdate',
+            'access_token' => 'aaa',
+            'status'       => 'ACTIVE',
+            'archived'     => true
+        ]);
     }
 }
