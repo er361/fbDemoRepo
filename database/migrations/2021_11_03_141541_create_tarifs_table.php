@@ -16,7 +16,7 @@ class CreateTarifsTable extends Migration
     {
         Schema::create('tarifs', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('user_id');
+            $table->uuid('user_id')->index();
             $table->enum('plan', ['alpha', 'beta', 'trial', 'base', 'pro'])->default('alpha');
             $table->unsignedInteger('users_limit')->default(3);
             $table->timestamps();
@@ -27,9 +27,9 @@ class CreateTarifsTable extends Migration
         });
 
         Schema::table('tarifs', function (Blueprint $table) {
-            $table->foreign('user_id')
-                ->references('id')
-                ->on('users');
+//            $table->foreign('user_id')
+//                ->references('id')
+//                ->on('users');
         });
 //        DB::statement('alter table tarifs TRANSACTIONAL=1');
     }

@@ -24,6 +24,7 @@ class AccountController extends Controller
      * Store a newly created resource in storage.
      *
      * @param \Illuminate\Http\Request $request
+     *
      * @return FbAccountResource
      */
     public function store(Request $request)
@@ -38,18 +39,13 @@ class AccountController extends Controller
             'cookies'               => 'json',
             'tags'                  => 'array',
             'tags.*'                => 'string',
-            'password' => 'string',
-            'user_agent' => 'string',
-            'cookies' => 'json',
-            'tags' => 'array',
-            'tags.*' => 'string',
-            'proxy_id' => 'uuid',
-            'proxy' => 'array',
-            'proxy.port' => 'integer',
-            'proxy.type' => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
-            'proxy.name' => 'required_with:proxy|string',
-            'proxy.host' => 'required_with:proxy|string',
-            'proxy.login' => 'required_with:proxy|string',
+            'proxy_id'              => 'uuid',
+            'proxy'                 => 'array',
+            'proxy.port'            => 'integer',
+            'proxy.type'            => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
+            'proxy.name'            => 'required_with:proxy|string',
+            'proxy.host'            => 'required_with:proxy|string',
+            'proxy.login'           => 'required_with:proxy|string',
         ]);
 
         $account = FbAccount::query()->create(
@@ -61,7 +57,6 @@ class AccountController extends Controller
                 ]
             )
         );
-
 
         if ($request->has('proxy')) {
             $proxyData = array_merge(
@@ -110,7 +105,7 @@ class AccountController extends Controller
     public function deleteBulk(Request $request)
     {
         $this->validate($request, [
-            'ids' => 'array|required',
+            'ids'   => 'array|required',
             'ids.*' => 'uuid'
         ]);
         FbAccount::query()->whereIn('id', $request->get('ids'))
@@ -121,7 +116,7 @@ class AccountController extends Controller
     public function archiveBulk(Request $request)
     {
         $this->validate($request, [
-            'ids' => 'array|required',
+            'ids'   => 'array|required',
             'ids.*' => 'uuid'
         ]);
 //        DB::enableQueryLog();
@@ -134,7 +129,7 @@ class AccountController extends Controller
     public function unArchiveBulk(Request $request)
     {
         $this->validate($request, [
-            'ids' => 'array|required',
+            'ids'   => 'array|required',
             'ids.*' => 'uuid'
         ]);
 
@@ -147,6 +142,7 @@ class AccountController extends Controller
      * Remove the specified resource from storage.
      *
      * @param Request $request
+     *
      * @return \Illuminate\Support\Collection
      */
 //    public function destroy(FbAccount $fbAccount)
@@ -157,7 +153,7 @@ class AccountController extends Controller
     {
         $tags = collect($request->get('tags'))
             ->transform(fn($tag) => [
-                'name' => $tag,
+                'name'    => $tag,
                 'team_id' => Auth::user()->team->id
             ]);
         return $tags;

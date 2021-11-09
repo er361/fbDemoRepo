@@ -11,18 +11,21 @@ class FbAccount extends Model
 {
     use HasFactory, Uuid, SoftDeletes;
 
-    protected $fillable = [
-        'user_id',
-        'team_id',
-        'proxy_id',
-        'name',
-        'access_token',
-        'business_access_token',
-        'password',
-        'user_agent',
-        'cookies',
-        'archived'
-    ];
+    protected $fillable
+        = [
+            'user_id',
+            'team_id',
+            'proxy_id',
+            'name',
+            'access_token',
+            'business_access_token',
+            'password',
+            'user_agent',
+            'cookies',
+            'archived',
+            'facebook_id',
+            'status'
+        ];
 
     public function tags()
     {

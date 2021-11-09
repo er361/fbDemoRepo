@@ -15,16 +15,16 @@ class CreateTeamsTable extends Migration
     public function up()
     {
         Schema::create('teams', function (Blueprint $table) {
-            $table->uuid('founder_id');
+            $table->uuid('founder_id')->index();
             $table->string('name')
                 ->index()
                 ->nullable();
 
             $table->timestamps();
 
-            $table->foreign('founder_id')
-                ->references('id')
-                ->on('users');
+//            $table->foreign('founder_id')
+//                ->references('id')
+//                ->on('users');
         });
         //DB::statement('alter table teams TRANSACTIONAL=1');
     }

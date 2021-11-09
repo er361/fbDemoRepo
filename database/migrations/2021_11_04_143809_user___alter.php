@@ -20,13 +20,13 @@ class UserAlter extends Migration
             $table->dropColumn('email_verified_at');
             $table->dropColumn('remember_token');
             $table->softDeletes()->after('updated_at');
-            $table->uuid('team_id')->nullable(false)->after('id');
+            $table->uuid('team_id')->nullable(false)->after('id')->index();
             $table->string('username')
                 ->after('team_id')->unique();
 
-            $table->foreign('team_id')
-                ->references('id')
-                ->on('teams');
+//            $table->foreign('team_id')
+//                ->references('id')
+//                ->on('teams');
             $table->index('display_name');
         });
     }
@@ -34,6 +34,7 @@ class UserAlter extends Migration
     /**
      * Reverse the migrations.
      * те
+     *
      * @return void
      */
     public function down()
