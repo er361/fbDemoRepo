@@ -7,6 +7,9 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
+/**
+ * @group accounts
+ */
 class AccountArchiveBulkTest extends TestCase
 {
     use DatabaseTransactions, WithFaker;

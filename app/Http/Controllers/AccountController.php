@@ -324,6 +324,8 @@ class AccountController extends Controller
         FbAccount::query()->whereIn('id', $request->get('ids'))
             ->where('user_id', Auth::id())
             ->update(['archived' => false]);
+
+        return response()->json(['success' => true]);
     }
 
     /**

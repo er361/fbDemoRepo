@@ -7,6 +7,9 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
+/**
+ * @group accounts
+ */
 class AccountUnarchiveBulkTest extends TestCase
 {
     use DatabaseTransactions, WithFaker;
@@ -27,7 +30,7 @@ class AccountUnarchiveBulkTest extends TestCase
             ->first();
 
         $response = $this->put(
-            '/api/accounts/unarchive-bulk',
+            '/api/fb-accounts/unarchive-bulk',
             ['ids' => [$accountToUnarchive->id]],
             $this->headers
         );
