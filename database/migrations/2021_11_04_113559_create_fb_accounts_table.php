@@ -16,10 +16,10 @@ class CreateFbAccountsTable extends Migration
     {
         Schema::create('fb_accounts', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('team_id')->index();
-            $table->uuid('user_id')->index();
-            $table->uuid('proxy_id')->nullable()->index();
-            $table->string('name')->index();
+            $table->uuid('user_id');
+            $table->uuid('team_id');
+            $table->uuid('proxy_id')->nullable();
+            $table->string('name');
 
             $table->text('notes')->nullable();
             $table->text('user_agent')->nullable();
@@ -46,22 +46,23 @@ class CreateFbAccountsTable extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-//            $table->foreign('user_id')
-//                ->references('id')
-//                ->on('users');
-//
-//            $table->foreign('team_id')
-//                ->references('id')
-//                ->on('teams');
-//
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users');
+
+            $table->foreign('team_id')
+                ->references('id')
+                ->on('teams');
+
 //            $table->foreign('proxy_id')
 //                ->references('id')
-//                ->on('proxy');
+//                ->on('proxies');
         });
 
 //        DB::statement('alter table fb_accounts TRANSACTIONAL=1');
 
         DB::statement('alter table fb_accounts ADD FULLTEXT INDEX idx_ft_notes (notes)');
+        DB::statement('alter table fb_accounts ADD FULLTEXT INDEX idx_ft_name (name)');
         DB::statement('alter table fb_accounts ADD FULLTEXT INDEX idx_ft_acc_token (access_token)');
         DB::statement('alter table fb_accounts ADD FULLTEXT INDEX idx_ft_business_token (business_access_token)');
         DB::statement('alter table fb_accounts ADD FULLTEXT INDEX idx_ft_cookies (cookies)');
