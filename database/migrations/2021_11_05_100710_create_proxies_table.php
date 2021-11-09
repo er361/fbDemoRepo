@@ -16,8 +16,8 @@ class CreateProxiesTable extends Migration
     {
         Schema::create('proxies', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('team_id');
-            $table->uuid('user_id');
+            $table->uuid('team_id')->index();
+            $table->uuid('user_id')->index();
             $table->enum('type', ['http', 'https', 'socks4', 'socks5', 'ssh'])
                 ->index();
             $table->string('name')->nullable();
@@ -32,13 +32,13 @@ class CreateProxiesTable extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreign('user_id')
-                ->references('id')
-                ->on('users');
-//
-            $table->foreign('team_id')
-                ->references('id')
-                ->on('teams');
+//            $table->foreign('user_id')
+//                ->references('id')
+//                ->on('users');
+////
+//            $table->foreign('team_id')
+//                ->references('id')
+//                ->on('teams');
         });
 
         DB::statement('alter table proxies ADD FULLTEXT INDEX idx_ft_name (name)');

@@ -6,15 +6,13 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class RegisterTest extends TestCase
+/**
+ * @group auth
+ */
+class AuthRegisterTest extends TestCase
 {
     use WithFaker, DatabaseTransactions;
 
-    /**
-     * A basic feature test example.
-     *
-     * @return void
-     */
     public function test_no_username()
     {
         $data = [

@@ -16,18 +16,18 @@ class CreateFbAccountsTagsTable extends Migration
     {
         Schema::create('fb_accounts_tags', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('account_id');
-            $table->uuid('team_id');
+            $table->uuid('account_id')->index();
+            $table->uuid('team_id')->index();
             $table->string('name')->index();
             $table->timestamps();
 
-            $table->foreign('account_id')
-                ->references('id')
-                ->on('fb_accounts');
-
-            $table->foreign('team_id')
-                ->references('id')
-                ->on('teams');
+//            $table->foreign('account_id')
+//                ->references('id')
+//                ->on('fb_accounts');
+//
+//            $table->foreign('team_id')
+//                ->references('id')
+//                ->on('teams');
         });
 //        DB::statement('alter table fb_accounts_tags TRANSACTIONAL=1');
     }

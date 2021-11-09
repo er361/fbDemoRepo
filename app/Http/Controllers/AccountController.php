@@ -86,6 +86,7 @@ class AccountController extends Controller
      * Store a newly created resource in storage.
      *
      * @param \Illuminate\Http\Request $request
+     *
      * @return FbAccountResource
      */
     public function store(Request $request)
@@ -118,7 +119,6 @@ class AccountController extends Controller
                 ]
             )
         );
-
 
         if ($request->has('proxy')) {
             $proxy = $this->createProxy($request);
@@ -318,6 +318,7 @@ class AccountController extends Controller
 
     /**
      * @param Request $request
+     *
      * @return \Illuminate\Support\Collection
      */
     public

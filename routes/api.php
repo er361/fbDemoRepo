@@ -4,7 +4,6 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProxyController;
 use App\Http\Controllers\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -37,6 +36,7 @@ Route::prefix('auth')->group(function () {
  *
  * */
 Route::middleware('auth:api')->group(function () {
+    Route::get('/profile', [AuthController::class, 'userProfile']);
     Route::prefix('users')->group(function () {
         Route::put('{id}/change-password', [UserController::class, 'changePassword']);
     });

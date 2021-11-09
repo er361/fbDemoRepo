@@ -6,15 +6,13 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class LoginTest extends TestCase
+/**
+ * @group auth
+ */
+class AuthLoginTest extends TestCase
 {
     use WithFaker, DatabaseTransactions;
 
-    /**
-     * A basic feature test example.
-     *
-     * @return void
-     */
     public function test_no_data()
     {
         $response = $this->post('/api/auth/login');
