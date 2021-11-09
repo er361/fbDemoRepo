@@ -196,7 +196,7 @@ class FbAccountCreateTest extends TestCase
         $this->assertEquals('http', $newProxy->type);
     }
 
-    public function test_success_with_new_proxy_and_proxy_id()
+    public function test_422_with_new_proxy_and_proxy_id()
     {
         $someProxy = Proxy::first();
 
