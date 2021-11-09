@@ -2,14 +2,17 @@
 
 namespace Tests\Feature;
 
-use App\Models\FbAccount;
+use App\Models\Proxy;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class AccountDeleteBulkTest extends TestCase
+/**
+ * @group proxy
+ */
+class ProxyDeleteBulkTest extends TestCase
 {
-    use DatabaseTransactions, WithFaker;
+    use WithFaker, DatabaseTransactions;
 
     public function __construct()
     {
@@ -22,32 +25,31 @@ class AccountDeleteBulkTest extends TestCase
 
     public function test_successful_delete()
     {
-        // взять два специально заготовленных аккаунтов
-        $accountToDelete1 = FbAccount::where('name', 'accountToDelete1')
+        // взять два специально заготовленных прокси
+        $proxyToDelete1 = Proxy::where('name', 'proxyToDelete1')
             ->select('id')
             ->first();
-        $accountToDelete2 = FbAccount::where('name', 'accountToDelete2')
+        $proxyToDelete2 = Proxy::where('name', 'proxyToDelete2')
             ->select('id')
             ->first();
 
         // удалить их
         $response = $this->delete(
-            '/api/accounts/delete-bulk',
-            ['ids' => [$accountToDelete1->id, $accountToDelete2->id]],
+            '/api/proxy/delete-bulk',
+            ['ids' => [$proxyToDelete1->id, $proxyToDelete2->id]],
             $this->headers
         );
         $response->assertStatus(200);
 
         // снова взять их из БД
-        $accountToDelete1 = FbAccount::where('name', 'accountToDelete1')
+        $proxyToDelete1 = Proxy::where('name', 'proxyToDelete1')
             ->first();
-        $accountToDelete2 = FbAccount::where('name', 'accountToDelete2')
+        $proxyToDelete2 = Proxy::where('name', 'proxyToDelete2')
             ->first();
-
 
         // проверить факт их удаления
-        $this->assertNotEmpty($accountToDelete1->deleted_at);
-        $this->assertNotEmpty($accountToDelete2->deleted_at);
+        $this->assertEquals(true, is_null($proxyToDelete1->deleted_at));
+        $this->assertEquals(true, is_null($proxyToDelete2->deleted_at));
 
         // проверить ответ API
         $response->assertJsonPath('success', true);

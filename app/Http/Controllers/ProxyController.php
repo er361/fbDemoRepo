@@ -8,6 +8,8 @@ use App\Models\FbAccount;
 use App\Models\Proxy;
 use App\Rules\IpOrDNS;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Support\Facades\Validator;
@@ -19,7 +21,7 @@ class ProxyController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     * @return AnonymousResourceCollection
      */
     public function index(ListRequest $request)
     {
@@ -32,19 +34,19 @@ class ProxyController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      *
      * @return ProxyResource
      */
     public function store(Request $request)
     {
         $this->validate($request, [
-            'type' => 'string|required|in:http,https,socks5,socks4,ssh',
-            'name' => 'string',
-            'host' => 'required|string',
-            'port' => 'required|integer',
-            'login' => 'string',
-            'password' => 'string',
+            'type'          => 'string|required|in:http,https,socks5,socks4,ssh',
+            'name'          => 'string',
+            'host'          => 'required|string',
+            'port'          => 'required|integer',
+            'login'         => 'string',
+            'password'      => 'string',
             'change_ip_url' => 'string'
         ]);
 
@@ -65,9 +67,9 @@ class ProxyController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param \App\Models\Proxy $proxy
+     * @param Proxy $proxy
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function show(Proxy $proxy)
     {
@@ -77,8 +79,8 @@ class ProxyController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\Proxy $proxy
+     * @param Request $request
+     * @param Proxy   $proxy
      *
      * @return ProxyResource
      */
@@ -86,10 +88,10 @@ class ProxyController extends Controller
     {
         //
         $validatedData = $this->validate($request, [
-            'type' => 'string|in:http,https,socks5,socks4,ssh',
-            'name' => 'string',
-            'host' => 'string',
-            'port' => 'integer',
+            'type'          => 'string|in:http,https,socks5,socks4,ssh',
+            'name'          => 'string',
+            'host'          => 'string',
+            'port'          => 'integer',
             'change_ip_url' => 'string'
         ]);
 
@@ -102,12 +104,14 @@ class ProxyController extends Controller
     public function deleteBulk(Request $request)
     {
         $this->validate($request, [
-            'ids' => 'array|required',
+            'ids'   => 'array|required',
             'ids.*' => 'uuid'
         ]);
 
         Proxy::query()->whereIn('id', $request->get('ids'))
             ->where('user_id', Auth::id())
             ->delete();
+
+        return response()->json(['success' => true]);
     }
 }

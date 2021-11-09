@@ -46,22 +46,19 @@ Route::middleware('auth:api')->group(function () {
  * Аккаунты
  *
  * */
-Route::apiResource('accounts', AccountController::class);
 Route::prefix('accounts')->group(function () {
     Route::delete('delete-bulk', [AccountController::class, 'deleteBulk']);
     Route::put('archive-bulk', [AccountController::class, 'archiveBulk']);
     Route::put('unarchive-bulk', [AccountController::class, 'unArchiveBulk']);
 });
+Route::apiResource('accounts', AccountController::class);
 
 
 /*
  * Прокси
  *
  * */
-Route::apiResource('proxy', ProxyController::class);
 Route::prefix('proxy')->group(function () {
     Route::delete('delete-bulk', [ProxyController::class, 'deleteBulk']);
 });
-
-
-
+Route::apiResource('proxy', ProxyController::class);

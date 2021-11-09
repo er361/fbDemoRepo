@@ -35,9 +35,8 @@ class AccountUnarchiveBulkTest extends TestCase
         $accountToUnarchive = FbAccount::where('name', 'accountToUnarchive')
             ->first();
 
-        $this->assertEquals(0, $accountToUnarchive->archived, 'archived attribute should be 0');
-
         $response->assertStatus(200);
+        $this->assertEquals(0, $accountToUnarchive->archived, 'archived attribute should be 0');
         $response->assertJsonPath('success', true);
     }
 }

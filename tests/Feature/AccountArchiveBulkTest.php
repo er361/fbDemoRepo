@@ -35,9 +35,8 @@ class AccountArchiveBulkTest extends TestCase
         $accountToArchive = FbAccount::where('name', 'accountToArchive')
             ->first();
 
-        $this->assertEquals(1, $accountToArchive->archived, 'archived attribute should be 1');
-
         $response->assertStatus(200);
+        $this->assertEquals(1, $accountToArchive->archived, 'archived attribute should be 1');
         $response->assertJsonPath('success', true);
     }
 }
