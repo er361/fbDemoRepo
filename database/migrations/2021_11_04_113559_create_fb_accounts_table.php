@@ -19,7 +19,7 @@ class CreateFbAccountsTable extends Migration
             $table->uuid('user_id');
             $table->uuid('team_id');
             $table->uuid('proxy_id')->nullable();
-            $table->string('name')->index();
+            $table->string('name');
 
             $table->text('notes')->nullable();
             $table->text('user_agent')->nullable();
@@ -54,14 +54,15 @@ class CreateFbAccountsTable extends Migration
                 ->references('id')
                 ->on('teams');
 
-            $table->foreign('proxy_id')
-                ->references('id')
-                ->on('proxy');
+//            $table->foreign('proxy_id')
+//                ->references('id')
+//                ->on('proxies');
         });
 
 //        DB::statement('alter table fb_accounts TRANSACTIONAL=1');
 
         DB::statement('alter table fb_accounts ADD FULLTEXT INDEX idx_ft_notes (notes)');
+        DB::statement('alter table fb_accounts ADD FULLTEXT INDEX idx_ft_name (name)');
         DB::statement('alter table fb_accounts ADD FULLTEXT INDEX idx_ft_acc_token (access_token)');
         DB::statement('alter table fb_accounts ADD FULLTEXT INDEX idx_ft_business_token (business_access_token)');
         DB::statement('alter table fb_accounts ADD FULLTEXT INDEX idx_ft_cookies (cookies)');

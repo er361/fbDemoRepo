@@ -17,11 +17,69 @@ class AccountController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index()
+    public function index(Request $request)
     {
         //
+        $this->validate($request, [
+            'sort' => 'array',
+            'sort.name' => 'in:asc,desc',
+            'sort.status' => 'in:asc,desc',
+            'filters' => 'array',
+            'filters.status' => 'in:NEW,TOKEN_ERROR,ACTIVE',
+            'filters.archived' => 'boolean',
+            'filters.user_id' => 'array',
+            'filters.user_id.*' => 'uuid',
+            'filters.name' => 'string|max:255',
+            'filters.tags' => 'array',
+            'filters.tags.*' => 'string|max:255',
+            'perPage' => 'integer'
+        ]);
+
+        $accounts = FbAccount::query()
+            ->when($request->has('sort'), function (Builder $query) use ($request) {
+                $query->when(
+                    $request->has('sort.name'),
+                    fn($q) => $q->orderBy('name', $request->input('sort.name'))
+                )->when(
+                    $request->has('sort.status'),
+                    fn($q) => $q->orderBy('status', $request->input('sort.status'))
+                );
+            })->when($request->has('filters'), function (Builder $query) use ($request) {
+                //status
+                $query->when(
+                    $request->has('filters.status'),
+                    fn(Builder $q) => $q->where('status', $request->input('filters.status'))
+                );
+                //archived
+                $query->when(
+                    $request->has('filters.archived'),
+                    fn(Builder $q) => $q->where('archived', $request->input('filters.archived'))
+                );
+                //user_id
+                $query->when(
+                    $request->has('filters.user_id'),
+                    fn(Builder $q) => $q->whereIn('user_id', $request->input('filters.user_id'))
+                );
+                //name
+                $query->when(
+                    $request->has('filters.name'),
+                    fn(Builder $q) => $q->whereRaw(
+                        sprintf("match(name) against('%s')", $request->input('filters.name'))
+                    )
+                );
+                //tags
+                $query->when(
+                    $request->has('filters.tags'),
+                    fn(Builder $q) => $q->whereHas(
+                        'tags',
+                        fn(Builder $q) => $q->whereIn('name', $request->input('filters.tags'))
+                    )
+                );
+            })->paginate($request->get('perPage'));
+
+        return FbAccountResource::collection($accounts);
     }
 
     /**
@@ -34,8 +92,8 @@ class AccountController extends Controller
     {
         //
         $this->validate($request, [
-            'name'                  => 'required|string',
-            'access_token'          => 'required|string',
+            'name' => 'required|string',
+            'access_token' => 'required|string',
             'business_access_token' => 'string',
             'password' => 'string',
             'user_agent' => 'string',
@@ -79,8 +137,10 @@ class AccountController extends Controller
      * @param \App\Models\FbAccount $fbAccount
      * @return \Illuminate\Http\Response
      */
-    public function show(FbAccount $fbAccount)
-    {
+    public
+    function show(
+        FbAccount $fbAccount
+    ) {
         //
     }
 
@@ -91,8 +151,11 @@ class AccountController extends Controller
      * @param \App\Models\FbAccount $fbAccount
      * @return FbAccountResource
      */
-    public function update(Request $request, FbAccount $fbAccount)
-    {
+    public
+    function update(
+        Request $request,
+        FbAccount $fbAccount
+    ) {
         //
         $this->validate($request, [
             'name' => 'string|max:255',
@@ -126,8 +189,10 @@ class AccountController extends Controller
         return new FbAccountResource($fbAccount->load('proxy', 'tags'));
     }
 
-    public function changeProxy(Request $request)
-    {
+    public
+    function changeProxy(
+        Request $request
+    ) {
         $this->validate($request, [
             'ids' => 'array|required',
             'ids.*' => 'uuid',
@@ -157,8 +222,10 @@ class AccountController extends Controller
             });
     }
 
-    public function addTags(Request $request)
-    {
+    public
+    function addTags(
+        Request $request
+    ) {
         $this->validate($request, [
             'ids' => 'array|required',
             'ids.*' => 'uuid',
@@ -186,8 +253,10 @@ class AccountController extends Controller
             });
     }
 
-    public function removeTags(Request $request)
-    {
+    public
+    function removeTags(
+        Request $request
+    ) {
         $this->validate($request, [
             'ids' => 'array|required',
             'ids.*' => 'uuid',
@@ -207,8 +276,10 @@ class AccountController extends Controller
             });
     }
 
-    public function deleteBulk(Request $request)
-    {
+    public
+    function deleteBulk(
+        Request $request
+    ) {
         $this->validate($request, [
             'ids' => 'array|required',
             'ids.*' => 'uuid'
@@ -218,8 +289,10 @@ class AccountController extends Controller
             ->delete();
     }
 
-    public function archiveBulk(Request $request)
-    {
+    public
+    function archiveBulk(
+        Request $request
+    ) {
         $this->validate($request, [
             'ids' => 'array|required',
             'ids.*' => 'uuid'
@@ -229,8 +302,10 @@ class AccountController extends Controller
             ->update(['archived' => true]);
     }
 
-    public function unArchiveBulk(Request $request)
-    {
+    public
+    function unArchiveBulk(
+        Request $request
+    ) {
         $this->validate($request, [
             'ids' => 'array|required',
             'ids.*' => 'uuid'
@@ -245,8 +320,10 @@ class AccountController extends Controller
      * @param Request $request
      * @return \Illuminate\Support\Collection
      */
-    public function createTags(Request $request): \Illuminate\Support\Collection
-    {
+    public
+    function createTags(
+        Request $request
+    ): \Illuminate\Support\Collection {
         $tags = collect($request->get('tags'))
             ->transform(fn($tag) => [
                 'name' => $tag,
@@ -259,8 +336,10 @@ class AccountController extends Controller
      * @param Request $request
      * @return Builder|Model
      */
-    public function createProxy(Request $request): Builder|Model
-    {
+    public
+    function createProxy(
+        Request $request
+    ): Builder|Model {
         $proxyData = array_merge(
             $request->get('proxy'),
             [

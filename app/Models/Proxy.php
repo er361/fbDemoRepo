@@ -11,6 +11,7 @@ class Proxy extends Model
 {
     use HasFactory, Uuid, SoftDeletes;
 
+    protected $table = 'proxies';
     protected $fillable = [
         'team_id',
         'user_id',
