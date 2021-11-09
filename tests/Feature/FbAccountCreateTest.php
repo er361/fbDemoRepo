@@ -10,7 +10,7 @@ use Tests\TestCase;
 /**
  * @group accounts
  */
-class AccountCreateTest extends TestCase
+class FbAccountCreateTest extends TestCase
 {
     use WithFaker, DatabaseTransactions;
 
@@ -161,6 +161,59 @@ class AccountCreateTest extends TestCase
         $this->assertEquals('newProxyForAccount', $newProxy->name);
         $this->assertEquals('login', $newProxy->login);
         $this->assertEquals('password', $newProxy->password);
+    }
+
+    public function test_success_with_new_proxy_with_no_auth_and_name()
+    {
+        $data = [
+            'name'         => 'accountWithNewProxy',
+            'access_token' => $this->faker->text(100),
+            'proxy'        => [
+                'type' => 'http',
+                'host' => '1.1.1.1',
+                'port' => 8080,
+            ]
+        ];
+
+        $response = $this->post('/api/fb-accounts', $data, $this->headers);
+
+        $response->assertStatus(201);
+        $response->assertJsonStructure([
+            'data' => [
+                'id',
+                'user_id',
+                'team_id',
+                'name',
+                'access_token',
+                'proxy_id'
+            ]
+        ]);
+        $this->assertEquals(true, !is_null($response->json()['data']['proxy_id']));
+
+        $newProxy = Proxy::find($response->json()['data']['proxy_id']);
+        $this->assertEquals('1.1.1.1', $newProxy->host);
+        $this->assertEquals(8080, $newProxy->port);
+        $this->assertEquals('http', $newProxy->type);
+    }
+
+    public function test_success_with_new_proxy_and_proxy_id()
+    {
+        $someProxy = Proxy::first();
+
+        $data = [
+            'name'         => 'accountWithNewProxy',
+            'access_token' => $this->faker->text(100),
+            'proxy_id'     => $someProxy->id,
+            'proxy'        => [
+                'type' => 'http',
+                'host' => '1.1.1.1',
+                'port' => 8080,
+            ]
+        ];
+
+        $response = $this->post('/api/fb-accounts', $data, $this->headers);
+
+        $response->assertStatus(422);
     }
 
     public function test_success_with_business_access_token()

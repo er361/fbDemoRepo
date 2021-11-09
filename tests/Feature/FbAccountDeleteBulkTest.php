@@ -10,7 +10,7 @@ use Tests\TestCase;
 /**
  * @group accounts
  */
-class AccountDeleteBulkTest extends TestCase
+class FbAccountDeleteBulkTest extends TestCase
 {
     use DatabaseTransactions, WithFaker;
 
