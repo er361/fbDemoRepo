@@ -8,7 +8,10 @@ use App\Models\Proxy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -17,24 +20,24 @@ class AccountController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     * @return AnonymousResourceCollection
      */
     public function index(Request $request)
     {
         //
         $this->validate($request, [
-            'sort' => 'array',
-            'sort.name' => 'in:asc,desc',
-            'sort.status' => 'in:asc,desc',
-            'filters' => 'array',
-            'filters.status' => 'in:NEW,TOKEN_ERROR,ACTIVE',
-            'filters.archived' => 'boolean',
-            'filters.user_id' => 'array',
+            'sort'              => 'array',
+            'sort.name'         => 'in:asc,desc',
+            'sort.status'       => 'in:asc,desc',
+            'filters'           => 'array',
+            'filters.status'    => 'in:NEW,TOKEN_ERROR,ACTIVE',
+            'filters.archived'  => 'boolean',
+            'filters.user_id'   => 'array',
             'filters.user_id.*' => 'uuid',
-            'filters.name' => 'string|max:255',
-            'filters.tags' => 'array',
-            'filters.tags.*' => 'string|max:255',
-            'perPage' => 'integer'
+            'filters.name'      => 'string|max:255',
+            'filters.tags'      => 'array',
+            'filters.tags.*'    => 'string|max:255',
+            'perPage'           => 'integer'
         ]);
 
         $accounts = FbAccount::query()
@@ -85,7 +88,7 @@ class AccountController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      *
      * @return FbAccountResource
      */
@@ -93,21 +96,21 @@ class AccountController extends Controller
     {
         //
         $this->validate($request, [
-            'name' => 'required|string',
-            'access_token' => 'required|string',
+            'name'                  => 'required|string',
+            'access_token'          => 'required|string',
             'business_access_token' => 'string',
-            'password' => 'string',
-            'user_agent' => 'string',
-            'cookies' => 'json',
-            'tags' => 'array',
-            'tags.*' => 'string',
-            'proxy_id' => 'uuid',
-            'proxy' => 'array',
-            'proxy.port' => 'required_with:proxy|integer',
-            'proxy.type' => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
-            'proxy.name' => 'required_with:proxy|string',
-            'proxy.host' => 'required_with:proxy|string',
-            'proxy.login' => 'required_with:proxy|string',
+            'password'              => 'string',
+            'user_agent'            => 'string',
+            'cookies'               => 'json',
+            'tags'                  => 'array',
+            'tags.*'                => 'string',
+            'proxy_id'              => 'uuid',
+            'proxy'                 => 'array',
+            'proxy.port'            => 'required_with:proxy|integer',
+            'proxy.type'            => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
+            'proxy.name'            => 'required_with:proxy|string',
+            'proxy.host'            => 'required_with:proxy|string',
+            'proxy.login'           => 'required_with:proxy|string',
         ]);
 
         $account = FbAccount::query()->create(
@@ -134,8 +137,9 @@ class AccountController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param \App\Models\FbAccount $fbAccount
-     * @return \Illuminate\Http\Response
+     * @param FbAccount $fbAccount
+     *
+     * @return Response
      */
     public
     function show(
@@ -147,8 +151,9 @@ class AccountController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\FbAccount $fbAccount
+     * @param Request   $request
+     * @param FbAccount $fbAccount
+     *
      * @return FbAccountResource
      */
     public
@@ -158,20 +163,20 @@ class AccountController extends Controller
     ) {
         //
         $this->validate($request, [
-            'name' => 'string|max:255',
-            'useragent' => 'string',
-            'tags' => 'array',
-            'tags.*' => 'string',
-            'access_token' => 'string',
+            'name'                  => 'string|max:255',
+            'useragent'             => 'string',
+            'tags'                  => 'array',
+            'tags.*'                => 'string',
+            'access_token'          => 'string',
             'business_access_token' => 'string',
-            'notes' => 'string', //todo sanitize
-            'proxy_id' => 'uuid',
-            'proxy' => 'array',
-            'proxy.port' => 'required_with:proxy|integer',
-            'proxy.type' => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
-            'proxy.name' => 'required_with:proxy|string',
-            'proxy.host' => 'required_with:proxy|string',
-            'proxy.login' => 'required_with:proxy|string',
+            'notes'                 => 'string', //todo sanitize
+            'proxy_id'              => 'uuid',
+            'proxy'                 => 'array',
+            'proxy.port'            => 'required_with:proxy|integer',
+            'proxy.type'            => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
+            'proxy.name'            => 'required_with:proxy|string',
+            'proxy.host'            => 'required_with:proxy|string',
+            'proxy.login'           => 'required_with:proxy|string',
         ]);
 
 
@@ -194,14 +199,14 @@ class AccountController extends Controller
         Request $request
     ) {
         $this->validate($request, [
-            'ids' => 'array|required',
-            'ids.*' => 'uuid',
-            'proxy_id' => 'uuid|required_without:proxy',
-            'proxy' => 'array|required_without:proxy_id',
-            'proxy.port' => 'required_with:proxy|integer',
-            'proxy.type' => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
-            'proxy.name' => 'required_with:proxy|string',
-            'proxy.host' => 'required_with:proxy|string',
+            'ids'         => 'array|required',
+            'ids.*'       => 'uuid',
+            'proxy_id'    => 'uuid|required_without:proxy',
+            'proxy'       => 'array|required_without:proxy_id',
+            'proxy.port'  => 'required_with:proxy|integer',
+            'proxy.type'  => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
+            'proxy.name'  => 'required_with:proxy|string',
+            'proxy.host'  => 'required_with:proxy|string',
             'proxy.login' => 'required_with:proxy|string',
         ]);
 
@@ -227,14 +232,14 @@ class AccountController extends Controller
         Request $request
     ) {
         $this->validate($request, [
-            'ids' => 'array|required',
-            'ids.*' => 'uuid',
-            'tags' => 'array|required',
+            'ids'         => 'array|required',
+            'ids.*'       => 'uuid',
+            'tags'        => 'array|required',
             'tags.*.name' => 'string|max:255'
         ]);
 
         $tags = collect($request->get('tags'))->transform(fn($tag) => [
-            'name' => $tag['name'],
+            'name'    => $tag['name'],
             'team_id' => Auth::user()->team_id
         ]);
 
@@ -258,9 +263,9 @@ class AccountController extends Controller
         Request $request
     ) {
         $this->validate($request, [
-            'ids' => 'array|required',
-            'ids.*' => 'uuid',
-            'tags' => 'array|required',
+            'ids'         => 'array|required',
+            'ids.*'       => 'uuid',
+            'tags'        => 'array|required',
             'tags.*.name' => 'string|max:255'
         ]);
         $tags = collect($request->get('tags'));
@@ -281,18 +286,20 @@ class AccountController extends Controller
         Request $request
     ) {
         $this->validate($request, [
-            'ids' => 'array|required',
+            'ids'   => 'array|required',
             'ids.*' => 'uuid'
         ]);
         FbAccount::query()->whereIn('id', $request->get('ids'))
             ->where('user_id', Auth::id())
             ->delete();
+
+        return response()->json(['success' => true]);
     }
 
     public function archiveBulk(Request $request)
     {
         $this->validate($request, [
-            'ids' => 'array|required',
+            'ids'   => 'array|required',
             'ids.*' => 'uuid'
         ]);
 
@@ -310,7 +317,7 @@ class AccountController extends Controller
         Request $request
     ) {
         $this->validate($request, [
-            'ids' => 'array|required',
+            'ids'   => 'array|required',
             'ids.*' => 'uuid'
         ]);
 
@@ -322,15 +329,15 @@ class AccountController extends Controller
     /**
      * @param Request $request
      *
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public
     function createTags(
         Request $request
-    ): \Illuminate\Support\Collection {
+    ): Collection {
         $tags = collect($request->get('tags'))
             ->transform(fn($tag) => [
-                'name' => $tag,
+                'name'    => $tag,
                 'team_id' => Auth::user()->team->id
             ]);
         return $tags;
@@ -338,6 +345,7 @@ class AccountController extends Controller
 
     /**
      * @param Request $request
+     *
      * @return Builder|Model
      */
     public
