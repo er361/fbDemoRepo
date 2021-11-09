@@ -18,6 +18,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+/*
+ * Авторизация / Регистрация
+ *
+ * */
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])
         ->middleware('throttle:login');
@@ -28,24 +32,36 @@ Route::prefix('auth')->group(function () {
     Route::post('/refresh-token', [AuthController::class, 'refresh']);
 });
 
-
+/*
+ * Пользователи
+ *
+ * */
 Route::middleware('auth:api')->group(function () {
     Route::prefix('users')->group(function () {
         Route::put('{id}/change-password', [UserController::class, 'changePassword']);
     });
 });
 
+/*
+ * Аккаунты
+ *
+ * */
+Route::apiResource('accounts', AccountController::class);
 Route::prefix('accounts')->group(function () {
     Route::delete('delete-bulk', [AccountController::class, 'deleteBulk']);
     Route::put('archive-bulk', [AccountController::class, 'archiveBulk']);
     Route::put('unarchive-bulk', [AccountController::class, 'unArchiveBulk']);
 });
-Route::apiResource('accounts', AccountController::class);
 
+
+/*
+ * Прокси
+ *
+ * */
+Route::apiResource('proxy', ProxyController::class);
 Route::prefix('proxy')->group(function () {
     Route::delete('delete-bulk', [ProxyController::class, 'deleteBulk']);
 });
-Route::apiResource('proxy', ProxyController::class);
-Route::apiResource('accounts', AccountController::class);
+
 
 
