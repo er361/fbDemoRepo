@@ -13,6 +13,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 use function Symfony\Component\Translation\t;
@@ -137,11 +138,17 @@ class ProxyController extends Controller
             'name' => 'string',
             'host' => 'string',
             'port' => 'integer',
-            'change_ip_url' => 'string'
+            'change_ip_url' => 'string',
+            'expiration_date' => 'date'
         ]);
 
         $proxy->update($validatedData);
         $proxy->refresh();
+
+        if ($request->has('expiration_date') && !$proxy->expiration_date) {
+            Log::warning('Proxy expiration date not set id :' . $proxy->id);
+            abort(400, 'expiration date not set');
+        }
 
         return new ProxyResource($proxy);
     }
