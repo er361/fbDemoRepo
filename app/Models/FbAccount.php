@@ -26,15 +26,23 @@ class FbAccount extends Model
         static::addGlobalScope(new TeamScope());
     }
 
-    public function scopeByRole(Builder $query)
+    public function scopeViewByRole(Builder $query)
     {
-        switch (Auth::user()->role) {
-            case User::ROLE_TEAM_LEAD:
-                return $query->whereRelation('user.teamleads', 'teamlead_id', Auth::id());
-            case User::ROLE_FARMER:
-            case User::ROLE_USER:
-                return $query->where('user_id', Auth::id());
+        if (Auth::user()->role !== User::ROLE_ADMIN) {
+            $query->where(function (Builder $builder) {
+                $builder->where('user_id', Auth::id())
+                    ->orWhereHas('permissions', fn(Builder $q) => $q->where([
+                        'to_user_id' => Auth::id(),
+                        'type' => FbAccount::PERMISSION_TYPE_VIEW
+                    ]));
+            });
         }
+
+        if (Auth::user()->role == User::ROLE_TEAM_LEAD) {
+            $query->orWhereRelation('user.teamleads', 'teamlead_id', Auth::id());
+        }
+
+        return $query;
     }
 
     protected $fillable = [

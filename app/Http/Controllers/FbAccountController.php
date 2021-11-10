@@ -43,7 +43,10 @@ class FbAccountController extends Controller
             'filters.tags' => 'array',
             'filters.tags.*' => 'string|max:255'
         ]);
-
+//        Auth::setUser(\App\Models\User::query()->firstWhere('role','admin'));
+//        Auth::setUser(\App\Models\User::query()->firstWhere('role', 'teamlead'));
+        Auth::setUser(\App\Models\User::query()->firstWhere('username', 'jrw8rpyov5@dolphin.ru.com'));
+        DB::enableQueryLog();
         $accounts = FbAccount::query()
             ->when($request->has('sort'), function (Builder $query) use ($request) {
                 if ($request->has('sort.name')) {
@@ -88,9 +91,10 @@ class FbAccountController extends Controller
                     )
                 );
             })
-            ->byRole()
-            ->paginate($request->get('perPage', 10));
-
+            ->viewByRole()
+//            ->paginate($request->get('perPage', 10));
+            ->get();
+//        dd(DB::getQueryLog());
         return FbAccountResource::collection($accounts);
     }
 
@@ -170,7 +174,6 @@ class FbAccountController extends Controller
             });
         FbAccount::query()
             ->whereIn('id', $request->get('ids'))
-            ->where('user_id', Auth::id())
             ->orWhereHas('permissions', fn(Builder $q) => $q->where([
                 'to_user_id' => Auth::id(),
                 'type' => FbAccount::PERMISSION_TYPE_SHARE
