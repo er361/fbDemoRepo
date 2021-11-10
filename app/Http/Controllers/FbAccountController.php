@@ -8,6 +8,7 @@ use App\Models\FbAccount;
 use App\Models\Proxy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
@@ -15,6 +16,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class FbAccountController extends Controller
@@ -147,6 +149,66 @@ class FbAccountController extends Controller
         return new FbAccountResource($account->load('tags', 'proxy'));
     }
 
+    public function addPermissions(Request $request)
+    {
+        $this->validate($request, [
+            'ids' => 'required|array',
+            'ids.*' => 'uuid',
+            'permissions' => 'required|array',
+            'permissions.*.to_user_id' => 'uuid',
+            'permissions.*.type' => 'in:view,stat,actions,share'
+        ]);
+
+        $permissions = $request->collect('permissions')
+            ->transform(function ($permission) {
+                $permission['team_id'] = Auth::user()->team_id;
+                $permission['from_user_id'] = Auth::id();
+                return $permission;
+            });
+        FbAccount::query()
+            ->whereIn('id', $request->get('ids'))
+            ->where('user_id', Auth::id())
+            ->orWhereHas('permissions', fn(Builder $q) => $q->where([
+                'to_user_id' => Auth::id(),
+                'type' => FbAccount::PERMISSION_TYPE_SHARE
+            ]))->each(function (FbAccount $account) use ($request, $permissions) {
+                $permissions->each(function ($permission) use ($account) {
+                    try {
+                        $account->permissions()->create($permission);
+                    } catch (QueryException $exception) {
+                        if ($exception->getCode() == 23000) {
+                            Log::warning('Duplicate permission', $permission);
+                        }
+                    }
+                });
+            });
+    }
+
+    public function removePermissions(Request $request)
+    {
+        $this->validate($request, [
+            'ids' => 'required|array',
+            'ids.*' => 'uuid',
+            'permissions' => 'required|array',
+            'permissions.*.to_user_id' => 'uuid',
+            'permissions.*.type' => 'in:view,stat,actions,share'
+        ]);
+        $permissions = $request->collect('permissions');
+        FbAccount::query()
+            ->whereIn('id', $request->get('ids'))
+            ->where('user_id', Auth::id())
+            ->orWhereHas('permissions', fn(Builder $q) => $q->where([
+                'to_user_id' => Auth::id(),
+                'type' => FbAccount::PERMISSION_TYPE_SHARE
+            ]))
+            ->each(function (FbAccount $account) use ($request, $permissions) {
+                $account->permissions()
+                    ->whereIn('to_user_id', $permissions->pluck('to_user_id')->toArray())
+                    ->whereIn('type', $permissions->pluck('type')->toArray())
+                    ->delete();
+            });
+    }
+
     /**
      * Display the specified resource.
      *
@@ -211,8 +273,7 @@ class FbAccountController extends Controller
         return new FbAccountResource($fbAccount->load('proxy', 'tags'));
     }
 
-    public
-    function changeProxy(
+    public function changeProxy(
         Request $request
     ) {
         $this->validate($request, [
@@ -244,8 +305,7 @@ class FbAccountController extends Controller
             });
     }
 
-    public
-    function addTags(
+    public function addTags(
         Request $request
     ) {
         $this->validate($request, [
@@ -275,8 +335,7 @@ class FbAccountController extends Controller
             });
     }
 
-    public
-    function removeTags(
+    public function removeTags(
         Request $request
     ) {
         $this->validate($request, [
@@ -298,8 +357,7 @@ class FbAccountController extends Controller
             });
     }
 
-    public
-    function deleteBulk(
+    public function deleteBulk(
         Request $request
     ) {
         $this->validate($request, [

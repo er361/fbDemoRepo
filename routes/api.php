@@ -53,6 +53,8 @@ Route::prefix('fb-accounts')->group(function () {
     Route::post('add-tags', [FbAccountController::class, 'addTags']);
     Route::delete('remove-tags', [FbAccountController::class, 'removeTags']);
     Route::put('change-proxy', [FbAccountController::class, 'changeProxy']);
+    Route::put('add-permissions', [FbAccountController::class, 'addPermissions']);
+    Route::delete('remove-permissions', [FbAccountController::class, 'removePermissions']);
 });
 Route::apiResource('fb-accounts', FbAccountController::class);
 

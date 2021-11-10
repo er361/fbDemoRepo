@@ -17,14 +17,17 @@ class CreateFbAccountsPermissionsTable extends Migration
         Schema::create('fb_accounts_permissions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('account_id')->index();
+            $table->uuid('from_user_id')->index();
+            $table->uuid('to_user_id')->index();
             $table->uuid('team_id')->index();
-            $table->enum('name', [
-                'read',
-                'update',
-                'delete',
-                'stat'
+            $table->enum('type', [
+                'view',
+                'stat',
+                'actions',
+                'share'
             ]);
             $table->timestamps();
+            $table->unique(['account_id', 'to_user_id', 'type']);
 
 //            $table->foreign('account_id')
 //                ->references('id')
