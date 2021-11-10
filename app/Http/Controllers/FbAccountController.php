@@ -6,6 +6,7 @@ use App\Http\Requests\ListRequest;
 use App\Http\Resources\FbAccountResource;
 use App\Models\FbAccount;
 use App\Models\Proxy;
+use http\Client\Curl\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
@@ -86,7 +87,9 @@ class FbAccountController extends Controller
                         fn(Builder $q) => $q->whereIn('name', $request->input('filters.tags'))
                     )
                 );
-            })->where('user_id', Auth::id())->paginate($request->get('perPage', 10));
+            })
+            ->byRole()
+            ->paginate($request->get('perPage', 10));
 
         return FbAccountResource::collection($accounts);
     }

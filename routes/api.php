@@ -69,3 +69,10 @@ Route::prefix('proxy')->group(function () {
     Route::get('{proxy}/check', [ProxyController::class, 'check']);
 });
 Route::apiResource('proxy', ProxyController::class);
+
+Route::get('test', function () {
+    \Illuminate\Support\Facades\DB::enableQueryLog();
+    $builder = \App\Models\User::query()->with('teamleads', 'subordinates');
+    return $builder->find('5340e952-e62f-4e56-a504-412d55387960');
+//    dd(\Illuminate\Support\Facades\DB::getQueryLog());
+});

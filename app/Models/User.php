@@ -18,6 +18,12 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable, Uuid, SoftDeletes;
 
+    const ROLE_ADMIN = 'admin';
+    const ROLE_TEAM_LEAD = 'teamlead';
+    const ROLE_USER = 'user';
+    const ROLE_FARMER = 'farmer';
+
+
     /**
      * The attributes that are mass assignable.
      *
@@ -28,6 +34,7 @@ class User extends Authenticatable implements JWTSubject
             'display_name',
             'username',
             'password',
+            'role'
         ];
 
     /**
@@ -59,6 +66,26 @@ class User extends Authenticatable implements JWTSubject
     public function team()
     {
         return $this->hasOne(Team::class, 'founder_id');
+    }
+
+    public function teamleads()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'user_teamlead',
+            'user_id',
+            'teamlead_id'
+        );
+    }
+
+    public function subordinates()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'user_teamlead',
+            'teamlead_id',
+            'user_id'
+        );
     }
 
     public function getJWTIdentifier()

@@ -13,8 +13,8 @@ class TarifsAlter extends Migration
      */
     public function up()
     {
-        Schema::rename('tarifs', 'teams_subscriptions');
-        Schema::table('teams_subscriptions', function (Blueprint $table) {
+        Schema::rename('tarifs', 'team_subscription');
+        Schema::table('team_subscription', function (Blueprint $table) {
 //            $table->dropColumn('user_id');
             $table->uuid('team_id')->after('id')->index();
 //            $table->dropIndex('tarifs_user_id_foreign');
@@ -31,7 +31,7 @@ class TarifsAlter extends Migration
      */
     public function down()
     {
-        Schema::rename('teams_subscriptions', 'tarifs');
+        Schema::rename('team_subscription', 'tarifs');
         Schema::table('tarifs', function (Blueprint $table) {
             $table->integer('user_id')->after('id');
             $table->renameColumn('users_limit', 'usersLimit');
