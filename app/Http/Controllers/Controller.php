@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Str;
 
@@ -12,14 +13,24 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    public function jsonError($status = 400, $errors = '')
+    /**
+     * @param int $status
+     * @param string $errors
+     * @return JsonResponse
+     */
+    public function jsonError($status = 400, $errors = ''): JsonResponse
     {
         return response()->json([
             'errors' => $errors
         ], $status);
     }
 
-    public function jsonSuccess($status = 200, $message = '')
+    /**
+     * @param int $status
+     * @param string $message
+     * @return JsonResponse
+     */
+    public function jsonSuccess($status = 200, $message = ''): JsonResponse
     {
         return response()->json([
             'data' => [

@@ -2,7 +2,9 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Str;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -36,6 +38,15 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        $this->renderable(function (QueryException $e, $request) {
+            if (Str::contains($e->getMessage(), 'Duplicate entry')) {
+                return response()->json([
+                    'message' => 'Duplicate entry',
+                    'errors' => $e->getMessage()
+                ], 400);
+            }
         });
     }
 }
