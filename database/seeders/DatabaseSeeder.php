@@ -17,7 +17,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             ProxySeeder::class,
-            FbAccountSeeder::class
+            FbAccountSeeder::class,
+            TeamSeeder::class
         ]);
     }
 }

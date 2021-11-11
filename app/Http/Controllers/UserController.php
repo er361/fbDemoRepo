@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\UserResource;
+use App\Models\FbAccount;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
@@ -21,14 +22,15 @@ class UserController extends Controller
 
     //
 
-    public function changePassword(Request $request)
+    public function changePassword(Request $request, User $user)
     {
-        $this->authorize('create', User::class);
+        $this->authorize('update', User::class);
 
         $this->validate($request, [
             'password' => 'required|string|confirmed|min:6'
         ]);
-        Auth::user()->update(['password' => bcrypt($request->get('password'))]);
+
+        $user->update(['password' => bcrypt($request->get('password'))]);
     }
 
     public function store(Request $request)
@@ -69,7 +71,35 @@ class UserController extends Controller
 
         $user->saveQuietly();
 
-
         return new UserResource($user->refresh());
+    }
+
+    public function deleteBulk(Request $request)
+    {
+        $this->authorize('delete-bulk', User::class);
+
+        $this->validate($request, [
+            'ids' => 'array|required',
+            'ids.*' => 'uuid'
+        ]);
+        $request->collect('ids')->each(function ($id) {
+            if ($id == Auth::id()) {
+                abort(422, 'Нельзя удалить самого себя');
+            }
+
+            $user = User::query()->find($id);
+            if (!$user) {
+                return;
+            }
+
+            if ($user->team->founder_id == $user->id) {
+                abort(422, 'Нельзя удалить основателя команды');
+            }
+        });
+
+        User::query()->whereIn('id', $request->get('ids'))
+            ->ownTeam()
+            ->delete();
+        return response()->json(['success' => true]);
     }
 }

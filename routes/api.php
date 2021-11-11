@@ -40,6 +40,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/profile', [AuthController::class, 'userProfile']);
     Route::prefix('users')->group(function () {
         Route::put('{id}/change-password', [UserController::class, 'changePassword']);
+        Route::delete('delete-bulk', [UserController::class, 'deleteBulk']);
     });
     Route::apiResource('users', UserController::class);
 

@@ -4,10 +4,12 @@ namespace App\Policies;
 
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Support\Facades\Auth;
 
 class UserPolicy
 {
     use HandlesAuthorization;
+
 
     /**
      * Determine whether the user can view any models.
@@ -58,7 +60,10 @@ class UserPolicy
     public function update(User $user, User $model)
     {
         //
-
+        if ($user->role == User::ROLE_ADMIN && $user->team_id == Auth::user()->team_id) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -71,7 +76,17 @@ class UserPolicy
     public function delete(User $user, User $model)
     {
         //
+
     }
+
+    public function deleteBulk(User $user)
+    {
+        if ($user->role == User::ROLE_ADMIN) {
+            return true;
+        }
+        return false;
+    }
+
 
     /**
      * Determine whether the user can restore the model.

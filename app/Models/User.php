@@ -5,11 +5,15 @@ namespace App\Models;
 use App\Events\UserCreatedEvent;
 use App\Listeners\CreateTeamForUser;
 use App\Models\Helpers\Uuid;
+use App\Models\Scopes\TeamScope;
+use Illuminate\Auth\EloquentUserProvider;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -55,10 +59,14 @@ class User extends Authenticatable implements JWTSubject
      *
      * @var array
      */
-    protected $casts
-        = [
-            'email_verified_at' => 'datetime',
-        ];
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    public function scopeOwnTeam(Builder $query)
+    {
+        return $query->where('team_id', Auth::user()->team_id);
+    }
 
     public function tarif()
     {
@@ -67,7 +75,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function team()
     {
-        return $this->hasOne(Team::class, 'founder_id');
+        return $this->belongsTo(Team::class);
     }
 
     public function teamleads()
