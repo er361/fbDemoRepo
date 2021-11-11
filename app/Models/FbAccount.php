@@ -39,7 +39,16 @@ class FbAccount extends Model
         }
 
         if (Auth::user()->role == User::ROLE_TEAM_LEAD) {
-            $query->orWhereRelation('user.teamleads', 'teamlead_id', Auth::id());
+            $query->orWhereRelation('user.teamleads', 'teamlead_id', Auth::id())
+                ->orWhere(function (Builder $builder) {
+                    $builder->whereHas('permissions', function (Builder $builder) {
+                        $builder->whereIn('to_user_id', function ($builder) {
+                            $builder->select('user_id')
+                                ->from('user_teamlead')
+                                ->where('teamlead_id', Auth::id());
+                        })->where('type', FbAccount::PERMISSION_TYPE_VIEW);
+                    });
+                });
         }
 
         return $query;
