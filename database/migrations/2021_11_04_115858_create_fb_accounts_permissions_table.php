@@ -29,13 +29,21 @@ class CreateFbAccountsPermissionsTable extends Migration
             $table->timestamps();
             $table->unique(['account_id', 'to_user_id', 'type']);
 
-//            $table->foreign('account_id')
-//                ->references('id')
-//                ->on('fb_accounts');
-//
-//            $table->foreign('team_id')
-//                ->references('id')
-//                ->on('teams');
+            $table->foreign('account_id')
+                ->references('id')
+                ->on('fb_accounts');
+
+            $table->foreign('team_id')
+                ->references('id')
+                ->on('teams');
+
+            $table->foreign('from_user_id')
+                ->references('id')
+                ->on('users');
+
+            $table->foreign('to_user_id')
+                ->references('id')
+                ->on('users');
         });
 //        DB::statement('alter table fb_accounts_permissions TRANSACTIONAL=1');
     }

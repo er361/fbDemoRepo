@@ -7,6 +7,7 @@ use App\Http\Resources\ProxyResource;
 use App\Models\FbAccount;
 use App\Models\Proxy;
 use App\Rules\IpOrDNS;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
@@ -118,6 +119,59 @@ class ProxyController extends Controller
                 'external_ip' => $proxy->external_ip
             ]
         ]);
+    }
+
+    public function addPermissions(Request $request)
+    {
+        $this->validate($request, [
+            'ids' => 'required|array',
+            'ids.*' => 'uuid',
+            'permissions' => 'required|array',
+            'permissions.*.to_user_id' => 'uuid',
+            'permissions.*.type' => 'in:admin'
+        ]);
+
+        $permissions = $request->collect('permissions')
+            ->transform(function ($permission) {
+                $permission['team_id'] = Auth::user()->team_id;
+                $permission['from_user_id'] = Auth::id();
+                return $permission;
+            });
+
+        Proxy::query()
+            ->actionsByRole()
+            ->whereIn('id', $request->get('ids'))
+            ->each(function (Proxy $proxy) use ($request, $permissions) {
+                $permissions->each(function ($permission) use ($proxy) {
+                    try {
+                        $proxy->permissions()->create($permission);
+                    } catch (QueryException $exception) {
+                        Log::error($exception->getMessage());
+                    }
+                });
+            });
+    }
+
+    public function removePermissions(Request $request)
+    {
+        $this->validate($request, [
+            'ids' => 'required|array',
+            'ids.*' => 'uuid',
+            'permissions' => 'required|array',
+            'permissions.*.to_user_id' => 'uuid',
+            'permissions.*.type' => 'in:admin'
+        ]);
+
+        $permissions = $request->collect('permissions');
+        Proxy::query()
+            ->actionsByRole()
+            ->whereIn('id', $request->get('ids'))
+            ->each(function (Proxy $proxy) use ($request, $permissions) {
+                $proxy->permissions()
+                    ->whereIn('to_user_id', $permissions->pluck('to_user_id')->toArray())
+                    ->whereIn('type', $permissions->pluck('type')->toArray())
+                    ->delete();
+            });
     }
 
 

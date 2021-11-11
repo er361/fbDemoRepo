@@ -38,6 +38,8 @@ class CreateProxyPermissionsTable extends Migration
                 ->on('users');
 
             $table->timestamps();
+
+            $table->unique(['proxy_id', 'to_user_id', 'type']);
         });
     }
 

@@ -181,9 +181,7 @@ class FbAccountController extends Controller
                     try {
                         $account->permissions()->create($permission);
                     } catch (QueryException $exception) {
-                        if ($exception->getCode() == 23000) {
-                            Log::warning('Duplicate permission', $permission);
-                        }
+                        Log::error($exception->getMessage());
                     }
                 });
             });
