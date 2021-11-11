@@ -92,7 +92,7 @@ class FbAccountController extends Controller
                     )
                 );
             })
-            ->viewByRole()
+            ->actionsByRole()
             ->paginate($request->get('perPage', 10));
         return FbAccountResource::collection($accounts);
     }
@@ -171,12 +171,12 @@ class FbAccountController extends Controller
                 $permission['from_user_id'] = Auth::id();
                 return $permission;
             });
+
+
         FbAccount::query()
+            ->actionsByRole(FbAccount::PERMISSION_TYPE_SHARE)
             ->whereIn('id', $request->get('ids'))
-            ->orWhereHas('permissions', fn(Builder $q) => $q->where([
-                'to_user_id' => Auth::id(),
-                'type' => FbAccount::PERMISSION_TYPE_SHARE
-            ]))->each(function (FbAccount $account) use ($request, $permissions) {
+            ->each(function (FbAccount $account) use ($request, $permissions) {
                 $permissions->each(function ($permission) use ($account) {
                     try {
                         $account->permissions()->create($permission);
@@ -200,12 +200,8 @@ class FbAccountController extends Controller
         ]);
         $permissions = $request->collect('permissions');
         FbAccount::query()
+            ->actionsByRole(FbAccount::PERMISSION_TYPE_SHARE)
             ->whereIn('id', $request->get('ids'))
-            ->where('user_id', Auth::id())
-            ->orWhereHas('permissions', fn(Builder $q) => $q->where([
-                'to_user_id' => Auth::id(),
-                'type' => FbAccount::PERMISSION_TYPE_SHARE
-            ]))
             ->each(function (FbAccount $account) use ($request, $permissions) {
                 $account->permissions()
                     ->whereIn('to_user_id', $permissions->pluck('to_user_id')->toArray())
@@ -278,9 +274,8 @@ class FbAccountController extends Controller
         return new FbAccountResource($fbAccount->load('proxy', 'tags'));
     }
 
-    public function changeProxy(
-        Request $request
-    ) {
+    public function changeProxy(Request $request)
+    {
         $this->validate($request, [
             'ids' => 'array|required',
             'ids.*' => 'uuid',
@@ -294,6 +289,7 @@ class FbAccountController extends Controller
         ]);
 
         FbAccount::query()->whereIn('id', $request->get('ids'))
+            ->actionsByRole(FbAccount::PERMISSION_TYPE_ACTIONS)
             ->each(function ($account) use ($request) {
                 /**
                  * @var $account FbAccount
@@ -310,9 +306,8 @@ class FbAccountController extends Controller
             });
     }
 
-    public function addTags(
-        Request $request
-    ) {
+    public function addTags(Request $request)
+    {
         $this->validate($request, [
             'ids' => 'array|required',
             'ids.*' => 'uuid',
@@ -327,6 +322,7 @@ class FbAccountController extends Controller
 
 
         FbAccount::query()->whereIn('id', $request->get('ids'))
+            ->actionsByRole(FbAccount::PERMISSION_TYPE_ACTIONS)
             ->each(function ($account) use ($request, $tags) {
                 /**
                  * @var $account FbAccount
@@ -340,9 +336,8 @@ class FbAccountController extends Controller
             });
     }
 
-    public function removeTags(
-        Request $request
-    ) {
+    public function removeTags(Request $request)
+    {
         $this->validate($request, [
             'ids' => 'array|required',
             'ids.*' => 'uuid',
@@ -351,6 +346,7 @@ class FbAccountController extends Controller
         ]);
         $tags = collect($request->get('tags'));
         FbAccount::query()->whereIn('id', $request->get('ids'))
+            ->actionsByRole(FbAccount::PERMISSION_TYPE_ACTIONS)
             ->each(function ($account) use ($request, $tags) {
                 /**
                  * @var $account FbAccount
@@ -362,17 +358,16 @@ class FbAccountController extends Controller
             });
     }
 
-    public function deleteBulk(
-        Request $request
-    ) {
+    public function deleteBulk(Request $request)
+    {
         $this->validate($request, [
             'ids' => 'array|required',
             'ids.*' => 'uuid'
         ]);
-        FbAccount::query()->whereIn('id', $request->get('ids'))
-            ->where('user_id', Auth::id())
-            ->delete();
 
+        FbAccount::query()->whereIn('id', $request->get('ids'))
+            ->actionsByRole(FbAccount::PERMISSION_TYPE_ACTIONS)
+            ->delete();
         return response()->json(['success' => true]);
     }
 
@@ -384,7 +379,7 @@ class FbAccountController extends Controller
         ]);
 
         FbAccount::query()->whereIn('id', $request->get('ids'))
-            ->where('user_id', Auth::id())
+            ->actionsByRole(FbAccount::PERMISSION_TYPE_ACTIONS)
             ->update(['archived' => true]);
 
         return response()->json([
@@ -400,7 +395,7 @@ class FbAccountController extends Controller
         ]);
 
         FbAccount::query()->whereIn('id', $request->get('ids'))
-            ->where('user_id', Auth::id())
+            ->actionsByRole(FbAccount::PERMISSION_TYPE_ACTIONS)
             ->update(['archived' => false]);
 
         return response()->json(['success' => true]);

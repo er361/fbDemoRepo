@@ -12,14 +12,23 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 use function Symfony\Component\Translation\t;
 
+use const http\Client\Curl\PROXY_HTTP;
+
 class ProxyController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->authorizeResource(Proxy::class);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -27,7 +36,8 @@ class ProxyController extends Controller
      */
     public function index(ListRequest $request)
     {
-        $proxies = Proxy::query()->where('user_id', Auth::id())
+        $proxies = Proxy::query()
+            ->actionsByRole()
             ->paginate($request->get('perPage', 10));
 
         return ProxyResource::collection($proxies);
@@ -97,6 +107,7 @@ class ProxyController extends Controller
 
     public function check(Request $request, Proxy $proxy)
     {
+        $this->authorize('update', $proxy);
         if (!$proxy->check()) {
             abort(400, 'check fail');
         }
@@ -159,11 +170,9 @@ class ProxyController extends Controller
             'ids' => 'array|required',
             'ids.*' => 'uuid'
         ]);
-
         Proxy::query()->whereIn('id', $request->get('ids'))
-            ->where('user_id', Auth::id())
+            ->actionsByRole()
             ->delete();
-
         return response()->json(['success' => true]);
     }
 }
