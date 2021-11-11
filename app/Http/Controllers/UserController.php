@@ -74,6 +74,60 @@ class UserController extends Controller
         return new UserResource($user->refresh());
     }
 
+    public function addTags(Request $request)
+    {
+        $this->authorize('create', User::class);
+        $this->validate($request, [
+            'ids' => 'array|required',
+            'ids.*' => 'uuid',
+            'tags' => 'array|required',
+            'tags.*.name' => 'string|max:255'
+        ]);
+
+        $tags = collect($request->get('tags'))->transform(fn($tag) => [
+            'name' => $tag['name'],
+            'team_id' => Auth::user()->team_id
+        ]);
+
+
+        User::query()->whereIn('id', $request->get('ids'))
+            ->ownTeam()
+            ->each(function ($user) use ($request, $tags) {
+                /**
+                 * @var $user FbAccount
+                 */
+                $accountTagsNames = $user->tags()->pluck('name');
+                $tags->each(function ($tag) use ($accountTagsNames, $user) {
+                    if (!in_array($tag['name'], $accountTagsNames->toArray())) {
+                        $user->tags()->create($tag);
+                    }
+                });
+            });
+    }
+
+    public function removeTags(Request $request)
+    {
+        $this->authorize('delete-bulk', User::class);
+        $this->validate($request, [
+            'ids' => 'array|required',
+            'ids.*' => 'uuid',
+            'tags' => 'array|required',
+            'tags.*.name' => 'string|max:255'
+        ]);
+        $tags = collect($request->get('tags'));
+        User::query()->whereIn('id', $request->get('ids'))
+            ->ownTeam()
+            ->each(function ($user) use ($request, $tags) {
+                /**
+                 * @var $user FbAccount
+                 */
+
+                $user->tags()
+                    ->whereIn('name', $tags->pluck('name')->toArray())
+                    ->delete();
+            });
+    }
+
     public function deleteBulk(Request $request)
     {
         $this->authorize('delete-bulk', User::class);

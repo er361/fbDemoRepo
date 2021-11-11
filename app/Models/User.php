@@ -78,6 +78,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsTo(Team::class);
     }
 
+    public function tags()
+    {
+        return $this->hasMany(UserTag::class);
+    }
+
     public function teamleads()
     {
         return $this->belongsToMany(
