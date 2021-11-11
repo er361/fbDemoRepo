@@ -22,6 +22,11 @@ use Illuminate\Support\Facades\Validator;
 
 class FbAccountController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(FbAccount::class);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -252,11 +257,11 @@ class FbAccountController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->jsonResponse(422, $validator->errors());
+            return $this->jsonError(422, $validator->errors());
         }
 
         if ($request->has('proxy_id') && $request->has('proxy')) {
-            return $this->jsonResponse(422, 'нельзя использовать proxy_id вместе с proxy');
+            return $this->jsonError(422, 'Нельзя использовать proxy_id вместе с proxy');
         }
 
 

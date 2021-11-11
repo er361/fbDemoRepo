@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\FbAccount;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class FbAccountPolicy
@@ -32,6 +33,7 @@ class FbAccountPolicy
     public function view(User $user, FbAccount $fbAccount)
     {
         //
+
     }
 
     /**
@@ -54,22 +56,31 @@ class FbAccountPolicy
      */
     public function update(User $user, FbAccount $fbAccount)
     {
-        //
-    }
+        if ($user->role == User::ROLE_ADMIN) {
+            return true;
+        }
 
-    public function updatePermissions(User $user, FbAccount $fbAccount)
-    {
         if ($fbAccount->user_id == $user->id) {
             return true;
         }
 
         $permission = $fbAccount->permissions()->firstWhere([
-            'user_id' => Auth::user()->id,
-            'type' => FbAccount::PERMISSION_TYPE_SHARE
+            'to_user_id' => Auth::user()->id,
+            'type' => FbAccount::PERMISSION_TYPE_ACTIONS
         ]);
 
         if ($permission) {
             return true;
+        }
+
+        if ($user->role == User::ROLE_TEAM_LEAD) {
+            $subordinatesIds = $user->subordinates()->pluck('id');
+            $actionsPermissionToSubordinates = $fbAccount->permissions()
+                ->whereIn('to_user_id', $subordinatesIds)
+                ->where('type', FbAccount::PERMISSION_TYPE_ACTIONS)
+                ->exists();
+            $inSubordinatesId = in_array($fbAccount->user_id, $subordinatesIds->toArray());
+            return $actionsPermissionToSubordinates || $inSubordinatesId;
         }
 
         return false;
