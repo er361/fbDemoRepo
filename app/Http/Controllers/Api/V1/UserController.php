@@ -194,4 +194,17 @@ class UserController extends Controller
             ->delete();
         return response()->json(['success' => true]);
     }
+
+    public function restoreBulk(Request $request)
+    {
+        $this->authorize('restore', User::class);
+
+        $this->validate($request, [
+            'ids' => 'required|array',
+            'ids.*' => 'uuid'
+        ]);
+
+        User::onlyTrashed()->whereIn('id', $request->ids)
+            ->restore();
+    }
 }

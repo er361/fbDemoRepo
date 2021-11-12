@@ -96,9 +96,13 @@ class UserPolicy
      * @param \App\Models\User $model
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function restore(User $user, User $model)
+    public function restore(User $user)
     {
         //
+        if ($user->role == User::ROLE_ADMIN) {
+            return true;
+        }
+        return false;
     }
 
     /**
