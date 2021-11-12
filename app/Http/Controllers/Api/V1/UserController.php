@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Requests\ListRequest;
 use App\Http\Resources\V1\UserResource;
 use App\Models\FbAccount;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -18,6 +20,42 @@ class UserController extends Controller
     public function __construct()
     {
         $this->authorizeResource(User::class);
+    }
+
+    public function index(ListRequest $request)
+    {
+        $this->validate($request, [
+            'sort' => 'array',
+            'sort.username' => 'in:asc,desc',
+            'sort.display_name' => 'in:asc,desc',
+            'filters' => 'array',
+            'filters.with_trashes' => 'boolean',
+            'filters.tags' => 'array',
+            'filters.tags.*' => 'string|max:255'
+        ]);
+        $users = User::query()
+            ->ownTeam()
+            ->when($request->has('sort'), function (Builder $builder) use ($request) {
+                $builder->when(
+                    $request->has('username'),
+                    fn(Builder $q) => $q->orderBy('username', $request->input('username'))
+                );
+
+                $builder->when(
+                    $request->has('display_name'),
+                    fn(Builder $q) => $q->orderBy('display_name', $request->input('username'))
+                );
+            })->when($request->has('filters'), function (Builder $builder) use ($request) {
+                $builder->when($request->has('filters.with_trashes'), fn(Builder $q) => $q->withTrashed());
+                $builder->when(
+                    $request->has('filters.tags'),
+                    fn(Builder $q) => $q->whereHas(
+                        'tags',
+                        fn($q) => $q->whereIn('name', $request->input('filters.tags'))
+                    )
+                );
+            })->paginate($request->get('perPage', ListRequest::PER_PAGE_DEFAULT));
+        return UserResource::collection($users);
     }
 
     //
