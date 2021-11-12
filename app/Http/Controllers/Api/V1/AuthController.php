@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -54,8 +54,8 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'display_name' => 'nullable|string|between:2,255',
-            'username'     => 'required|string|email|max:255|unique:users',
-            'password'     => 'required|string|min:5',
+            'username' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:5',
         ]);
 
         if ($validator->fails()) {
@@ -126,9 +126,9 @@ class AuthController extends Controller
         return response()->json([
             'data' => [
                 'access_token' => $token,
-                'token_type'   => 'bearer',
-                'expires_in'   => Auth::factory()->getTTL() * 60,
-                'user'         => Auth::user()
+                'token_type' => 'bearer',
+                'expires_in' => Auth::factory()->getTTL() * 60,
+                'user' => Auth::user()
             ]
         ]);
     }

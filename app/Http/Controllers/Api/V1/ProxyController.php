@@ -1,26 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Requests\ListRequest;
-use App\Http\Resources\ProxyResource;
-use App\Models\FbAccount;
+use App\Http\Resources\V1\ProxyResource;
 use App\Models\Proxy;
-use App\Rules\IpOrDNS;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 
-use function Symfony\Component\Translation\t;
-
-use const http\Client\Curl\PROXY_HTTP;
 
 class ProxyController extends Controller
 {

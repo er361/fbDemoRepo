@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Requests\ListRequest;
-use App\Http\Resources\FbAccountResource;
+use App\Http\Resources\V1\FbAccountResource;
 use App\Models\FbAccount;
 use App\Models\Proxy;
-use http\Client\Curl\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
@@ -209,25 +208,9 @@ class FbAccountController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param FbAccount $fbAccount
-     *
-     * @return Response
-     */
-//    public function show(
-//        FbAccount $fbAccount
-//    ) {
-//        //
-//    }
-
-    /**
-     * Update the specified resource in storage.
-     *
      * @param Request $request
      * @param FbAccount $fbAccount
-     *
-     * @return FbAccountResource
+     * @return FbAccountResource|\Illuminate\Http\JsonResponse
      */
     public function update(Request $request, FbAccount $fbAccount)
     {

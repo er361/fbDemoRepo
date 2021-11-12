@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\FbAccountController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProxyController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\FbAccountController;
+use App\Http\Controllers\Api\V1\ProxyController;
+use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Route;
 | routes are loaded by the RouteServiceProvider within a group which
 | is assigned the "api" middleware group. Enjoy building your API!
 |
-*/
 
 /*
  * Авторизация / Регистрация

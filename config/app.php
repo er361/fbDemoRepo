@@ -14,7 +14,6 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
-
     /*
     |--------------------------------------------------------------------------
     | Application Environment
@@ -39,7 +38,7 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    'debug' => (bool)env('APP_DEBUG', false),
 
     /*
     |--------------------------------------------------------------------------
