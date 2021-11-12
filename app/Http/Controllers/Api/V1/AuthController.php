@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Events\Login;
+use App\Events\Logout;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -41,6 +43,8 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
             // @codeCoverageIgnoreEnd
         }
+
+        Login::dispatch(Auth::id(), $token);
 
         return $this->createNewToken($token);
     }
@@ -90,7 +94,7 @@ class AuthController extends Controller
     public function logout()
     {
         Auth::logout();
-
+        Logout::dispatch(Auth::id());
         return response()->json(['message' => 'User successfully signed out']);
     }
 

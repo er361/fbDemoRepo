@@ -126,4 +126,11 @@ class User extends Authenticatable implements JWTSubject
             }
         });
     }
+
+    public function invalidateToken()
+    {
+        $token = JwtToken::whereUserId($this->id)->first()->token;
+        \JWTAuth::setToken($token);
+        \JWTAuth::invalidate();
+    }
 }

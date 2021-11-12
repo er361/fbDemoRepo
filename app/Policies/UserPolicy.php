@@ -61,7 +61,7 @@ class UserPolicy
     public function update(User $user, User $model)
     {
         //
-        if ($user->role == User::ROLE_ADMIN && $user->team_id == Auth::user()->team_id) {
+        if ($user->role == User::ROLE_ADMIN && $model->team_id == Auth::user()->team_id) {
             return true;
         }
         return false;

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\FbAccountController;
 use App\Http\Controllers\Api\V1\ProxyController;
 use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +24,9 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])
         ->middleware('throttle:login');
+
+    Route::post('logout', [AuthController::class, 'logout'])
+        ->name('logout');
 
     Route::post('/register', [AuthController::class, 'register']);
 
@@ -82,8 +86,9 @@ Route::middleware('auth:api')->group(function () {
 
 
 Route::get('test', function () {
-    \Illuminate\Support\Facades\DB::enableQueryLog();
-    $builder = \App\Models\User::query()->with('teamleads', 'subordinates');
-    return $builder->find('5340e952-e62f-4e56-a504-412d55387960');
-//    dd(\Illuminate\Support\Facades\DB::getQueryLog());
+    Auth::tokenById();
+    $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3Q6MzA1NlwvYXBpXC92MVwvYXV0aFwvbG9naW4iLCJpYXQiOjE2MzY3Mzk5MDMsImV4cCI6MTY2Nzg0MzkwMywibmJmIjoxNjM2NzM5OTAzLCJqdGkiOiJzVko2OWw4SlhvOUJ3MWVZIiwic3ViIjoiODEwYTRkNmUtNTI5NC00NmU2LTgzZjktYWM3ZDhjNzYzZmM2IiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.TY8A8N-HhyZIUMPsq6D91s34kRZlMfYaXZo8L10yd-A';
+    JWTAuth::setToken($token);
+    JWTAuth::invalidate();
+//    JWTAuth::unsetToken();
 });

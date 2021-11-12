@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Requests\ListRequest;
 use App\Http\Resources\V1\UserResource;
 use App\Models\FbAccount;
+use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Namshi\JOSE\JWT;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
 {
@@ -33,6 +36,7 @@ class UserController extends Controller
             'filters.tags' => 'array',
             'filters.tags.*' => 'string|max:255'
         ]);
+
         $users = User::query()
             ->ownTeam()
             ->when($request->has('sort'), function (Builder $builder) use ($request) {
@@ -55,7 +59,44 @@ class UserController extends Controller
                     )
                 );
             })->paginate($request->get('perPage', ListRequest::PER_PAGE_DEFAULT));
+
         return UserResource::collection($users);
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $this->validate($request, [
+            'role' => 'in:admin,user,farmer,teamlead',
+            'username' => 'email',
+            'display_name' => 'string',
+            'password' => 'string|min:6',
+            'teamleads' => 'array',
+            'teamleads.*' => 'uuid'
+        ]);
+
+        $this->checkTeamleads($request);
+
+        if ($request->has('role')) {
+            if (Team::whereFounderId($user->id)->exists()) {
+                abort(422, 'Нельзя сменить роль основателю команды');
+            }
+
+            if ($user->id == Auth::id()) {
+                abort(422, 'Нельзя сменить роль самому себе');
+            }
+        }
+
+        $requestData = $request->collect();
+
+        if ($request->has('password')) {
+            $requestData->put('password', bcrypt($request->password));
+            $user->invalidateToken();
+        }
+
+
+        $user->update($requestData->all());
+
+        return new UserResource($user);
     }
 
     //
@@ -82,20 +123,7 @@ class UserController extends Controller
             'teamleads.*' => 'uuid'
         ]);
 
-        if ($request->get('teamleads') && $request->get('role') !== User::ROLE_USER) {
-            abort(422, 'Тимлиды могут быть добалвены только для роли user');
-        }
-
-        $request->collect('teamleads')->each(function ($teamLead) {
-            $teamlead = DB::table('user_teamlead')->where(['teamlead_id' => $teamLead])->first();
-            if (!$teamlead) {
-                abort(422, 'Тимлида с id ' . $teamLead . ' не существует');
-            } else {
-                if (User::query()->find($teamLead)->team_id !== Auth::user()->team_id) {
-                    abort(422, 'Тимлида с id ' . $teamLead . ' не в вашей команде');
-                }
-            }
-        });
+        $this->checkTeamleads($request);
 
         $user = new User();
         $user->fill(
@@ -206,5 +234,26 @@ class UserController extends Controller
 
         User::onlyTrashed()->whereIn('id', $request->ids)
             ->restore();
+    }
+
+    /**
+     * @param Request $request
+     */
+    public function checkTeamleads(Request $request): void
+    {
+        if ($request->get('teamleads') && $request->get('role') !== User::ROLE_USER) {
+            abort(422, 'Тимлиды могут быть добалвены только для роли user');
+        }
+
+        $request->collect('teamleads')->each(function ($teamLead) {
+            $teamlead = DB::table('user_teamlead')->where(['teamlead_id' => $teamLead])->first();
+            if (!$teamlead) {
+                abort(422, 'Тимлида с id ' . $teamLead . ' не существует');
+            } else {
+                if (User::query()->find($teamLead)->team_id !== Auth::user()->team_id) {
+                    abort(422, 'Тимлида с id ' . $teamLead . ' не в вашей команде');
+                }
+            }
+        });
     }
 }
