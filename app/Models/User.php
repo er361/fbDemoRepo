@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\Logout;
 use App\Events\UserCreatedEvent;
 use App\Listeners\CreateTeamForUser;
 use App\Models\Helpers\Uuid;
@@ -132,5 +133,6 @@ class User extends Authenticatable implements JWTSubject
         $token = JwtToken::whereUserId($this->id)->first()->token;
         \JWTAuth::setToken($token);
         \JWTAuth::invalidate();
+        Logout::dispatch($this->id);
     }
 }

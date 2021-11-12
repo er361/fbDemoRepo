@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Events\Logout;
 use App\Http\Requests\ListRequest;
 use App\Http\Resources\V1\UserResource;
 use App\Models\FbAccount;
