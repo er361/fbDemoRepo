@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\FbAccount;
+use App\Models\UserTag;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -18,7 +19,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             ProxySeeder::class,
             FbAccountSeeder::class,
-            TeamSeeder::class
+            TeamSeeder::class,
+            UserTagSeeder::class
         ]);
     }
 }

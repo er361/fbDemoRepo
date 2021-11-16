@@ -50,6 +50,8 @@ Route::middleware('auth:api')->group(function () {
 
         Route::put('add-tags', [UserController::class, 'addTags']);
         Route::delete('remove-tags', [UserController::class, 'removeTags']);
+
+        Route::get('tags', [UserController::class, 'tags']);
     });
     Route::apiResource('users', UserController::class);
 

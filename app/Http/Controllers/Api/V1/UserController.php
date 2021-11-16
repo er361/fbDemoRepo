@@ -8,7 +8,10 @@ use App\Http\Resources\V1\UserResource;
 use App\Models\FbAccount;
 use App\Models\Team;
 use App\Models\User;
+use App\Models\UserTag;
+use Barryvdh\Reflection\DocBlock\Tag;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -42,13 +45,13 @@ class UserController extends Controller
             ->ownTeam()
             ->when($request->has('sort'), function (Builder $builder) use ($request) {
                 $builder->when(
-                    $request->has('username'),
-                    fn(Builder $q) => $q->orderBy('username', $request->input('username'))
+                    $request->has('sort.username'),
+                    fn(Builder $q) => $q->orderBy('username', $request->input('sort.username'))
                 );
 
                 $builder->when(
-                    $request->has('display_name'),
-                    fn(Builder $q) => $q->orderBy('display_name', $request->input('username'))
+                    $request->has('sort.display_name'),
+                    fn(Builder $q) => $q->orderBy('display_name', $request->input('sort.display_name'))
                 );
             })->when($request->has('filters'), function (Builder $builder) use ($request) {
                 $builder->when($request->has('filters.with_trashes'), fn(Builder $q) => $q->withTrashed());
@@ -59,7 +62,9 @@ class UserController extends Controller
                         fn($q) => $q->whereIn('name', $request->input('filters.tags'))
                     )
                 );
-            })->paginate($request->get('perPage', ListRequest::PER_PAGE_DEFAULT));
+            })->with('tags', fn(HasMany $q) => $q->select('name', 'user_id'))->paginate(
+                $request->get('perPage', ListRequest::PER_PAGE_DEFAULT)
+            );
 
         return UserResource::collection($users);
     }
@@ -144,15 +149,16 @@ class UserController extends Controller
     public function addTags(Request $request)
     {
         $this->authorize('create', User::class);
+
         $this->validate($request, [
             'ids' => 'array|required',
             'ids.*' => 'uuid',
             'tags' => 'array|required',
-            'tags.*.name' => 'string|max:255'
+            'tags.*' => 'string|max:255'
         ]);
 
         $tags = collect($request->get('tags'))->transform(fn($tag) => [
-            'name' => $tag['name'],
+            'name' => $tag,
             'team_id' => Auth::user()->team_id
         ]);
 
@@ -179,20 +185,25 @@ class UserController extends Controller
             'ids' => 'array|required',
             'ids.*' => 'uuid',
             'tags' => 'array|required',
-            'tags.*.name' => 'string|max:255'
+            'tags.*' => 'string|max:255'
         ]);
-        $tags = collect($request->get('tags'));
         User::query()->whereIn('id', $request->get('ids'))
             ->ownTeam()
-            ->each(function ($user) use ($request, $tags) {
+            ->each(function ($user) use ($request) {
                 /**
                  * @var $user FbAccount
                  */
 
                 $user->tags()
-                    ->whereIn('name', $tags->pluck('name')->toArray())
+                    ->whereIn('name', $request->get('tags'))
                     ->delete();
             });
+    }
+
+    public function tags(Request $request)
+    {
+        return UserTag::whereTeamId(Auth::user()->team_id)
+            ->pluck('name');
     }
 
     public function deleteBulk(Request $request)
