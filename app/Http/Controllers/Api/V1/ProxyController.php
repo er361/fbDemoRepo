@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Requests\ListRequest;
 use App\Http\Resources\V1\ProxyResource;
 use App\Models\Proxy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -29,8 +30,34 @@ class ProxyController extends Controller
      */
     public function index(ListRequest $request)
     {
+        $this->validate($request, [
+            'sort' => 'array',
+            'sort.name' => 'in:asc,desc',
+            'sort.type' => 'in:asc,desc',
+            'filters' => 'array',
+            'filters.name' => 'string|max:255'
+        ]);
+
         $proxies = Proxy::query()
             ->actionsByRole()
+            ->when($request->has('sort'), function (Builder $builder) use ($request) {
+                $builder->when(
+                    $request->has('sort.name'),
+                    fn(Builder $q) => $q->orderBy('name', $request->input('sort.name'))
+                );
+                $builder->when(
+                    $request->has('sort.type'),
+                    fn(Builder $q) => $q->orderBy('type', $request->input('sort.type'))
+                );
+            })
+            ->when($request->has('filters'), function (Builder $builder) use ($request) {
+                $builder->when(
+                    $request->has('filters.name'),
+                    fn(Builder $q) => $q->whereRaw(
+                        sprintf("match(name) against('%s')", $request->input('filters.name'))
+                    )
+                );
+            })
             ->paginate($request->get('perPage', 10));
 
         return ProxyResource::collection($proxies);
@@ -73,12 +100,12 @@ class ProxyController extends Controller
         $this->validate($request, [
             'proxies' => 'required|array',
             'proxies.*.type' => 'string|required|in:http,https,socks5,socks4,ssh',
-            'proxies.*.name' => 'string',
+            'proxies.*.name' => 'nullable|string',
             'proxies.*.host' => 'required|string',
             'proxies.*.port' => 'required|integer',
-            'proxies.*.login' => 'string',
-            'proxies.*.password' => 'string',
-            'proxies.*.change_ip_url' => 'string'
+            'proxies.*.login' => 'nullable|string',
+            'proxies.*.password' => 'nullable|string',
+            'proxies.*.change_ip_url' => 'nullable|string'
         ]);
 
         $request->collect('proxies')->each(function ($proxy) {
