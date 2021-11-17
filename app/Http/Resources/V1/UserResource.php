@@ -19,7 +19,9 @@ class UserResource extends JsonResource
             'username' => $this->username,
             'role' => $this->role,
             'display_name' => $this->display_name,
-            'tags' => $this->tags->pluck('name')
+            'tags' => $this->tags->pluck('name'),
+            'teamleads' => $this->teamleads,
+            'deleted_at' => $this->deleted_at,
         ];
     }
 }

@@ -129,7 +129,11 @@ class User extends Authenticatable implements JWTSubject
 
     public function invalidateToken()
     {
-        $token = JwtToken::whereUserId($this->id)->first()->token;
+        $token = JwtToken::whereUserId($this->id)->first()?->token;
+        if (!$token) {
+            return;
+        }
+
         \JWTAuth::setToken($token);
         \JWTAuth::invalidate();
         Logout::dispatch($this->id);

@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Namshi\JOSE\JWT;
@@ -62,7 +63,9 @@ class UserController extends Controller
                         fn($q) => $q->whereIn('name', $request->input('filters.tags'))
                     )
                 );
-            })->with('tags', fn(HasMany $q) => $q->select('name', 'user_id'))->paginate(
+            })->with('tags', fn(HasMany $q) => $q->select('name', 'user_id'))
+            ->with('teamleads:id,username')
+            ->paginate(
                 $request->get('perPage', ListRequest::PER_PAGE_DEFAULT)
             );
 
@@ -94,7 +97,9 @@ class UserController extends Controller
 
         $requestData = $request->collect();
 
-        if ($request->has('password')) {
+        if ($request->has('password') &&
+            !Hash::check($request->password, $user->password)
+        ) {
             $requestData->put('password', bcrypt($request->password));
             $user->invalidateToken();
         }
@@ -123,7 +128,7 @@ class UserController extends Controller
         $this->validate($request, [
             'role' => 'required|in:admin,user,farmer,teamlead',
             'username' => 'email|required',
-            'display_name' => 'string',
+            'display_name' => 'string|nullable',
             'password' => 'required|string|min:6',
             'teamleads' => 'array',
             'teamleads.*' => 'uuid'
