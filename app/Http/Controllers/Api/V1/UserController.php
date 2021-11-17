@@ -77,13 +77,19 @@ class UserController extends Controller
         $this->validate($request, [
             'role' => 'in:admin,user,farmer,teamlead',
             'username' => 'email',
-            'display_name' => 'string',
+            'display_name' => 'nullable|string',
             'password' => 'string|min:6',
             'teamleads' => 'array',
             'teamleads.*' => 'uuid'
         ]);
 
-        $this->checkTeamleads($request);
+        if ($request->has('teamleads')) {
+            $this->checkTeamleads($request);
+            $user->teamleads()->sync($request->get('teamleads'));
+        } else {
+            $user->teamleads()->detach();
+        }
+
 
         if ($request->has('role')) {
             if (Team::whereFounderId($user->id)->exists()) {
@@ -134,7 +140,9 @@ class UserController extends Controller
             'teamleads.*' => 'uuid'
         ]);
 
-        $this->checkTeamleads($request);
+        if ($request->has('teamleads')) {
+            $this->checkTeamleads($request);
+        }
 
         $user = new User();
         $user->fill(
@@ -146,7 +154,13 @@ class UserController extends Controller
             )
         );
 
+
         $user->saveQuietly();
+
+        if ($request->has('teamleads')) {
+            $user->teamleads()->sync($request->get('teamleads'));
+        }
+
 
         return new UserResource($user->refresh());
     }
@@ -258,7 +272,10 @@ class UserController extends Controller
      */
     public function checkTeamleads(Request $request): void
     {
-        if ($request->get('teamleads') && $request->get('role') !== User::ROLE_USER) {
+        if ($request->get('teamleads')
+            && $request->has('role')
+            && $request->get('role') !== User::ROLE_USER
+        ) {
             abort(422, 'Тимлиды могут быть добалвены только для роли user');
         }
 
