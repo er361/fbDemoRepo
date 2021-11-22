@@ -128,9 +128,7 @@ class ProxyController extends Controller
     public function check(Request $request, Proxy $proxy)
     {
         $this->authorize('update', $proxy);
-        if (!$proxy->check()) {
-            abort(400, 'check fail');
-        }
+        $proxy->check();
 
         return \response()->json([
             'data' => [
@@ -165,7 +163,7 @@ class ProxyController extends Controller
                     try {
                         $proxy->permissions()->create($permission);
                     } catch (QueryException $exception) {
-                        Log::error($exception->getMessage());
+                        Log::warning('duplicate proxy permission - ' . $exception->getMessage());
                     }
                 });
             });
@@ -218,21 +216,17 @@ class ProxyController extends Controller
     {
         //
         $validatedData = $this->validate($request, [
-            'type' => 'string|in:http,https,socks5,socks4,ssh',
-            'name' => 'string',
-            'host' => 'string',
-            'port' => 'integer',
-            'change_ip_url' => 'string',
-            'expiration_date' => 'date'
+            'type' => 'nullable|string|in:http,https,socks5,socks4,ssh',
+            'name' => 'nullable|string',
+            'host' => 'nullable|string',
+            'port' => 'nullable|integer',
+            'change_ip_url' => 'nullable|string',
+            'expiration_date' => 'nullable|date'
         ]);
 
         $proxy->update($validatedData);
         $proxy->refresh();
 
-        if ($request->has('expiration_date') && !$proxy->expiration_date) {
-            Log::warning('Proxy expiration date not set id :' . $proxy->id);
-            abort(400, 'expiration date not set');
-        }
 
         return new ProxyResource($proxy);
     }

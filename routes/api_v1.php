@@ -68,6 +68,7 @@ Route::middleware('auth:api')->group(function () {
         Route::put('change-proxy', [FbAccountController::class, 'changeProxy']);
         Route::put('add-permissions', [FbAccountController::class, 'addPermissions']);
         Route::delete('remove-permissions', [FbAccountController::class, 'removePermissions']);
+        Route::put('{fb_account}/save-notes', [FbAccountController::class, 'saveNotes']);
     });
     Route::apiResource('fb-accounts', FbAccountController::class);
 

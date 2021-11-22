@@ -21,6 +21,13 @@ class CreateProxyPermissionsTable extends Migration
             $table->uuid('to_user_id');
             $table->enum('type', ['admin']);
 
+            $table->unique([
+                'proxy_id',
+                'to_user_id',
+                'from_user_id',
+                'type'
+            ]);
+
             $table->foreign('proxy_id')
                 ->references('id')
                 ->on('proxies');

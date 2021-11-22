@@ -39,7 +39,8 @@ class FbAccountController extends Controller
             'sort.name' => 'in:asc,desc',
             'sort.status' => 'in:asc,desc',
             'filters' => 'array',
-            'filters.status' => 'in:new,token_error,active',
+            'filters.status' => 'array',
+            'filters.status.*' => 'in:new,token_error,active',
             'filters.archived' => 'boolean',
             'filters.user_id' => 'array',
             'filters.user_id.*' => 'uuid',
@@ -60,7 +61,7 @@ class FbAccountController extends Controller
                 //status
                 $query->when(
                     $request->has('filters.status'),
-                    fn(Builder $q) => $q->where('status', $request->input('filters.status'))
+                    fn(Builder $q) => $q->whereIn('status', $request->input('filters.status'))
                 );
 
                 //name
@@ -91,6 +92,7 @@ class FbAccountController extends Controller
                     )
                 );
             })
+            ->with('user:id,username,display_name')
             ->actionsByRole()
             ->paginate($request->get('perPage', 10));
         return FbAccountResource::collection($accounts);
@@ -109,21 +111,20 @@ class FbAccountController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'access_token' => 'required|string',
-            'business_access_token' => 'string',
-            'login' => 'string',
-            'password' => 'string',
-            'user_agent' => 'string',
-            'cookies' => 'json',
+            'business_access_token' => 'nullable|string',
+            'login' => 'nullable|string',
+            'password' => 'nullable|string',
+            'user_agent' => 'nullable|string',
+            'cookies' => 'nullable|json',
             'tags' => 'array',
             'tags.*' => 'string',
-            'proxy_id' => 'uuid',
             'proxy' => 'array',
             'proxy.type' => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
             'proxy.host' => 'required_with:proxy|string',
             'proxy.port' => 'required_with:proxy|integer',
-            'proxy.name' => 'string',
-            'proxy.login' => 'string',
-            'proxy.password' => 'string',
+            'proxy.name' => 'nullable|string',
+            'proxy.login' => 'nullable|string',
+            'proxy.password' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -151,6 +152,7 @@ class FbAccountController extends Controller
 
         $tags = $this->createTags($request);
         $account->tags()->createMany($tags);
+        $account->save();
         return new FbAccountResource($account->load('tags', 'proxy'));
     }
 
@@ -207,6 +209,15 @@ class FbAccountController extends Controller
             });
     }
 
+    public function saveNotes(Request $request, FbAccount $fbAccount)
+    {
+        $this->validate($request, [
+            'notes' => 'required|string'
+        ]);
+        $fbAccount->notes = $request->get('notes');
+        $fbAccount->save();
+    }
+
     /**
      * @param Request $request
      * @param FbAccount $fbAccount
@@ -216,13 +227,13 @@ class FbAccountController extends Controller
     {
         //
         $validator = Validator::make($request->all(), [
-            'name' => 'string|max:255',
-            'user_agent' => 'string',
+            'name' => 'nullable|string|max:255',
+            'user_agent' => 'nullable|string',
             'tags' => 'array',
             'tags.*' => 'string',
-            'access_token' => 'string',
-            'business_access_token' => 'string',
-            'notes' => 'string', //todo sanitize
+            'access_token' => 'nullable|string',
+            'business_access_token' => 'nullable|string',
+            'notes' => 'nullable|string', //todo sanitize
             'proxy_id' => 'uuid',
             'proxy' => 'array',
             'proxy.type' => 'required_with:proxy|in:http,https,socks5,socks4,ssh',
@@ -268,10 +279,13 @@ class FbAccountController extends Controller
             'proxy.host' => 'required_with:proxy|string',
             'proxy.login' => 'required_with:proxy|string',
         ]);
-
+        $proxy = null;
+        if ($request->has('proxy')) {
+            $proxy = $this->createProxy($request);
+        }
         FbAccount::query()->whereIn('id', $request->get('ids'))
             ->actionsByRole(FbAccount::PERMISSION_TYPE_ACTIONS)
-            ->each(function ($account) use ($request) {
+            ->each(function ($account) use ($request, $proxy) {
                 /**
                  * @var $account FbAccount
                  */
@@ -280,8 +294,9 @@ class FbAccountController extends Controller
                 }
 
                 if ($request->has('proxy')) {
-                    $proxy = $this->createProxy($request);
-                    $account->proxy()->associate($proxy);
+                    if ($proxy) {
+                        $account->proxy()->associate($proxy);
+                    }
                 }
                 $account->save();
             });
