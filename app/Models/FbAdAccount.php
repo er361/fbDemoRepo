@@ -18,6 +18,7 @@ class FbAdAccount extends Model
     const ACCOUNT_STATUS_TEMPORARY_UNAVAILABLE = 101;
     const ACCOUNT_STATUS_PENDING_CLOSURE = 100;
     public $incrementing = false;
+
     protected $fillable = [
         'id',
         'user_id',

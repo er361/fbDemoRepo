@@ -95,10 +95,11 @@ Route::get('test', function () {
     $fbFetchBase = new FbFetchBase($account);
     $fbFetchBase->fetch();
 
-    //    return $account->load(
-//        'adAccounts.campaigns',
-//        'adAccounts.campaigns.adsets',
-//        'adAccounts.campaigns.adsets.ads'
-//    );
-    return $account->load('adAccounts', 'campaigns', 'adsets', 'ads');
+    return $account->load(
+        'adAccounts',
+        'adAccounts.campaigns',
+        'adAccounts.campaigns.adsets',
+        'adAccounts.campaigns.adsets.ads'
+    );
+//    return $account->load('adAccounts', 'campaigns', 'adsets', 'ads');
 });
