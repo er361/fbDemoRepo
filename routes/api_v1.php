@@ -91,7 +91,7 @@ Route::middleware('auth:api')->group(function () {
 
 
 Route::get('test', function () {
-    $account = FbAccount::withoutGlobalScopes()->first();
+    $account = FbAccount::withoutGlobalScopes()->firstWhere('access_token', 'like', 'EAABs%');
     $fbFetchBase = new FbFetchBase($account);
     $fbFetchBase->fetch();
 

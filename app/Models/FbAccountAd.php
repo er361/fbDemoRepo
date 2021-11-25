@@ -17,6 +17,17 @@ class FbAccountAd extends Model
         'campaign_id',
         'adset_id',
         'team_id',
-        'user_id'
+        'user_id',
+        'status',
+        'effective_status',
+        'daily_budget',
+        'lifetime_budget',
+        'budget_remaining',
+        'ad_review_feedback',
+        'creative_id'
+    ];
+
+    protected $casts = [
+        'ad_review_feedback' => 'json'
     ];
 }

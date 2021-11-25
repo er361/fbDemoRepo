@@ -3,6 +3,8 @@
 namespace App\Http\Libraries;
 
 use App\Models\FbAccount;
+use App\Models\FbAccountAd;
+use App\Models\FbAccountAdset;
 use App\Models\FbAccountCampaign;
 use App\Models\FbAdAccount;
 
@@ -29,6 +31,9 @@ class FbFetchBase
 
         collect($adAccounts)->each(function ($adAccount) {
             $campaignFields = collect((new FbAccountCampaign())->getFillable())->implode(',');
+            $adsetsFields = collect((new FbAccountAdset())->getFillable())->implode(',');
+            $adFields = collect((new FbAccountAd())->getFillable())->implode(',');
+
             $subQueries = [
                 [
                     'method' => 'GET',
@@ -36,11 +41,11 @@ class FbFetchBase
                 ],
                 [
                     'method' => 'GET',
-                    'relative_url' => $adAccount['id'] . '/adsets?fields=id,name,account_id,campaign_id'
+                    'relative_url' => $adAccount['id'] . '/adsets?fields=' . $adsetsFields
                 ],
                 [
                     'method' => 'GET',
-                    'relative_url' => $adAccount['id'] . '/ads?fields=id,name,account_id,campaign_id,adset_id'
+                    'relative_url' => $adAccount['id'] . '/ads?fields=' . $adFields
                 ]
             ];
 
