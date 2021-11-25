@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\FbAccountController;
 use App\Http\Controllers\Api\V1\ProxyController;
 use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Libraries\FbFetchBase;
+use App\Models\FbAccount;
 use Illuminate\Support\Facades\Route;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -89,9 +91,14 @@ Route::middleware('auth:api')->group(function () {
 
 
 Route::get('test', function () {
-    Auth::tokenById();
-    $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9sb2NhbGhvc3Q6MzA1NlwvYXBpXC92MVwvYXV0aFwvbG9naW4iLCJpYXQiOjE2MzY3Mzk5MDMsImV4cCI6MTY2Nzg0MzkwMywibmJmIjoxNjM2NzM5OTAzLCJqdGkiOiJzVko2OWw4SlhvOUJ3MWVZIiwic3ViIjoiODEwYTRkNmUtNTI5NC00NmU2LTgzZjktYWM3ZDhjNzYzZmM2IiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.TY8A8N-HhyZIUMPsq6D91s34kRZlMfYaXZo8L10yd-A';
-    JWTAuth::setToken($token);
-    JWTAuth::invalidate();
-//    JWTAuth::unsetToken();
+    $account = FbAccount::withoutGlobalScopes()->first();
+    $fbFetchBase = new FbFetchBase($account);
+    $fbFetchBase->fetch();
+
+    //    return $account->load(
+//        'adAccounts.campaigns',
+//        'adAccounts.campaigns.adsets',
+//        'adAccounts.campaigns.adsets.ads'
+//    );
+    return $account->load('adAccounts', 'campaigns', 'adsets', 'ads');
 });

@@ -91,4 +91,24 @@ class FbAccount extends Model
     {
         return $this->hasMany(FbAccountsPermission::class, 'account_id');
     }
+
+    public function adAccounts()
+    {
+        return $this->hasMany(FbAdAccount::class, 'db_fb_account_id');
+    }
+
+    public function campaigns()
+    {
+        return $this->hasMany(FbAccountCampaign::class, 'db_fb_account_id');
+    }
+
+    public function adsets()
+    {
+        return $this->hasMany(FbAccountAdset::class, 'db_fb_account_id');
+    }
+
+    public function ads()
+    {
+        return $this->hasMany(FbAccountAd::class, 'db_fb_account_id');
+    }
 }

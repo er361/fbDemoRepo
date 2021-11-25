@@ -42,6 +42,21 @@ return [
             'after_commit' => false,
         ],
 
+        'onDemand' => [
+            'driver' => 'database',
+            'table' => 'jobs',
+            'queue' => 'onDemand',
+            'retry_after' => 90,
+            'after_commit' => false,
+        ],
+        'onSchedule' => [
+            'driver' => 'database',
+            'table' => 'jobs',
+            'queue' => 'onSchedule',
+            'retry_after' => 90,
+            'after_commit' => false,
+        ],
+
         'beanstalkd' => [
             'driver' => 'beanstalkd',
             'host' => 'localhost',
