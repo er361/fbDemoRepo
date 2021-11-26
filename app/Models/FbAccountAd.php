@@ -2,20 +2,21 @@
 
 namespace App\Models;
 
+use App\Models\Helpers\Uuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class FbAccountAd extends Model
 {
-    use HasFactory;
+    use HasFactory, Uuid;
 
     protected $fillable = [
-        'id',
         'name',
+        'ad_id',
         'account_id',
-        'db_fb_account_id',
         'campaign_id',
         'adset_id',
+        'fb_account_adset_id',
         'team_id',
         'user_id',
         'status',
@@ -30,4 +31,6 @@ class FbAccountAd extends Model
     protected $casts = [
         'ad_review_feedback' => 'json'
     ];
+
+
 }

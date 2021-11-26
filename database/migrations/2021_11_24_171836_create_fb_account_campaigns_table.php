@@ -14,22 +14,17 @@ class CreateFbAccountCampaignsTable extends Migration
     public function up()
     {
         Schema::create('fb_account_campaigns', function (Blueprint $table) {
-            $table->bigInteger('id')->primary();
-            $table->string('name')->index();
-
+            $table->uuid('id')->primary();
+            $table->bigInteger('campaign_id')->index();
             $table->bigInteger('account_id');
-            $table->uuid('db_fb_account_id');
+
+            $table->uuid('fb_ad_account_id');
             $table->uuid('team_id');
             $table->uuid('user_id');
 
-            $table->foreign('account_id')
-                ->references('account_id')
-                ->on('fb_ad_accounts')
-                ->onDelete('cascade');
-
-            $table->foreign('db_fb_account_id')
+            $table->foreign('fb_ad_account_id')
                 ->references('id')
-                ->on('fb_accounts')
+                ->on('fb_ad_accounts')
                 ->onDelete('cascade');
 
             $table->foreign('team_id')
@@ -40,6 +35,7 @@ class CreateFbAccountCampaignsTable extends Migration
                 ->references('id')
                 ->on('users');
 
+            $table->string('name')->index();
             $table->enum('status', [
                 'ACTIVE',
                 'PAUSED',

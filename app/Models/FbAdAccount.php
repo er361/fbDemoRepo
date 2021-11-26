@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Helpers\Uuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class FbAdAccount extends Model
 {
-    use HasFactory;
+    use HasFactory, Uuid;
 
     const ACCOUNT_STATUS_ACTIVE = 1;
     const ACCOUNT_STATUS_DISABLED = 2;
@@ -17,15 +18,16 @@ class FbAdAccount extends Model
     const ACCOUNT_STATUS_IN_GRACE_PERIOD = 9;
     const ACCOUNT_STATUS_TEMPORARY_UNAVAILABLE = 101;
     const ACCOUNT_STATUS_PENDING_CLOSURE = 100;
+
     public $incrementing = false;
 
     protected $fillable = [
-        'id',
         'user_id',
         'account_id',
+        'api_id',
         'team_id',
         'name',
-        'db_fb_account_id',
+        'fb_account_id',
         'amount_spent',
         'account_status',
         'balance',
@@ -52,6 +54,8 @@ class FbAdAccount extends Model
 
     public function campaigns()
     {
-        return $this->hasMany(FbAccountCampaign::class, 'account_id', 'account_id');
+        return $this->hasMany(FbAccountCampaign::class, 'fb_ad_account_id');
     }
+
+
 }

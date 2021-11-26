@@ -2,18 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Helpers\Uuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class FbAccountCampaign extends Model
 {
-    use HasFactory;
+    use HasFactory, Uuid;
 
     protected $fillable = [
-        'id',
         'name',
+        'campaign_id',
         'account_id',
-        'db_fb_account_id',
+        'fb_ad_account_id',
         'team_id',
         'user_id',
         'status',
@@ -28,6 +29,6 @@ class FbAccountCampaign extends Model
 
     public function adsets()
     {
-        return $this->hasMany(FbAccountAdset::class, 'campaign_id');
+        return $this->hasMany(FbAccountAdset::class, 'fb_account_campaign_id');
     }
 }

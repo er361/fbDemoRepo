@@ -16,6 +16,10 @@ class FbFetchBase
 
     private FbAccount $account;
 
+    private $campaigns;
+    private $adsets;
+    private $ads;
+
     /**
      * @param FbAccount $account
      */
@@ -27,42 +31,64 @@ class FbFetchBase
     public function fetch()
     {
         $adAccounts = $this->getAdAccounts();
-        $this->saveData($adAccounts, 'adAccounts');
+        $this->saveData($adAccounts, 'adAccount', $this->account);
 
-        collect($adAccounts)->each(function ($adAccount) {
-            $campaignFields = collect((new FbAccountCampaign())->getFillable())->implode(',');
-            $adsetsFields = collect((new FbAccountAdset())->getFillable())->implode(',');
-            $adFields = collect((new FbAccountAd())->getFillable())->implode(',');
+        $this->account->adAccounts()->each(function (FbAdAccount $adAccount) {
+            $res = $this->getBatchData($adAccount->api_id);
 
-            $subQueries = [
-                [
-                    'method' => 'GET',
-                    'relative_url' => $adAccount['id'] . '/campaigns?fields=' . $campaignFields
-                ],
-                [
-                    'method' => 'GET',
-                    'relative_url' => $adAccount['id'] . '/adsets?fields=' . $adsetsFields
-                ],
-                [
-                    'method' => 'GET',
-                    'relative_url' => $adAccount['id'] . '/ads?fields=' . $adFields
-                ]
-            ];
-
-            $response = \Http::post(self::BASE_URL, [
-                'batch' => $subQueries,
-                'access_token' => $this->account->access_token
-            ]);
-
-            $campaigns = json_decode($response->json()[0]['body'], true)['data'];
-            $adsets = json_decode($response->json()[1]['body'], true)['data'];
-            $ads = json_decode($response->json()[2]['body'], true)['data'];
+            $campaigns = json_decode($res->json()[0]['body'], true)['data'];
+            $adsets = json_decode($res->json()[1]['body'], true)['data'];
+            $ads = json_decode($res->json()[2]['body'], true)['data'];
 
 //            dump($campaigns,$adsets,$ads);
-            $this->saveData($campaigns, 'campaigns');
-            $this->saveData($adsets, 'adsets');
-            $this->saveData($ads, 'ads');
+            $this->saveData($campaigns, 'campaign', $adAccount);
+
+            $adAccount->campaigns()->each(function (FbAccountCampaign $campaign) use ($ads, $adsets) {
+                $adsetsByCampaign = collect($adsets)->where('campaign_id', $campaign->campaign_id);
+                $this->saveData($adsetsByCampaign, 'adset', $campaign);
+
+                $campaign->adsets()->each(function (FbAccountAdset $adset) use ($ads) {
+                    $adsByAdset = collect($ads)->where('adset_id', $adset->adset_id);
+                    $this->saveData($adsByAdset, 'ad', $adset);
+                });
+            });
         });
+    }
+
+    /**
+     * @param mixed $data
+     */
+    public function saveData(mixed $data, $type, $parentModel): void
+    {
+        $fill = collect($data)->map(function ($item) {
+            return array_merge($item, [
+                'team_id' => $this->account->team_id,
+                'user_id' => $this->account->user_id,
+            ]);
+        });
+
+        switch ($type) {
+            case 'adAccount':
+                $adAccounts = $fill->map(fn($item) => array_merge($item, ['api_id' => $item['id']]));
+                $parentModel->adAccounts()->delete();
+                $parentModel->adAccounts()->createMany($adAccounts);
+                break;
+            case 'campaign':
+                $campaigns = $fill->map(fn($item) => array_merge($item, ['campaign_id' => $item['id']]));
+                $parentModel->campaigns()->delete();
+                $parentModel->campaigns()->createMany($campaigns);
+                break;
+            case 'adset':
+                $adsets = $fill->map(fn($item) => array_merge($item, ['adset_id' => $item['id']]));
+                $parentModel->adsets()->delete();
+                $parentModel->adsets()->createMany($adsets);
+                break;
+            case 'ad':
+                $ads = $fill->map(fn($item) => array_merge($item, ['ad_id' => $item['id']]));
+                $parentModel->ads()->delete();
+                $parentModel->ads()->createMany($ads);
+                break;
+        }
     }
 
     /**
@@ -86,35 +112,40 @@ class FbFetchBase
     }
 
     /**
-     * @param mixed $data
+     * @param FbAdAccount $adAccount
+     * @return \Illuminate\Http\Client\Response
+     * @throws \Exception
      */
-    public function saveData(mixed $data, $type): void
+    public function getBatchData($adAccountId): \Illuminate\Http\Client\Response
     {
-        $fill = collect($data)->map(function ($item) {
-            return array_merge($item, [
-                'team_id' => $this->account->team_id,
-                'user_id' => $this->account->user_id
-            ]);
-        });
+        $campaignFields = collect((new FbAccountCampaign())->getFillable())->implode(',');
+        $adsetsFields = collect((new FbAccountAdset())->getFillable())->implode(',');
+        $adFields = collect((new FbAccountAd())->getFillable())->implode(',');
 
-        switch ($type) {
-            case 'adAccounts':
-                $this->account->adAccounts()->delete();
-                $this->account->adAccounts()->createMany($fill);
-                break;
-            case 'campaigns':
-                $this->account->campaigns()->delete();
-                $this->account->campaigns()->createMany($fill);
-                break;
-            case 'adsets':
-                $this->account->adsets()->delete();
-                $this->account->adsets()->createMany($fill);
-                break;
-            case 'ads':
-                $this->account->ads()->delete();
-                $this->account->ads()->createMany($fill);
-                break;
+        $subQueries = [
+            [
+                'method' => 'GET',
+                'relative_url' => $adAccountId . '/campaigns?fields=' . $campaignFields
+            ],
+            [
+                'method' => 'GET',
+                'relative_url' => $adAccountId . '/adsets?fields=' . $adsetsFields
+            ],
+            [
+                'method' => 'GET',
+                'relative_url' => $adAccountId . '/ads?fields=' . $adFields
+            ]
+        ];
+
+        $res = \Http::post(self::BASE_URL, [
+            'batch' => $subQueries,
+            'access_token' => $this->account->access_token
+        ]);
+
+        if (\Arr::exists($res->json(), 'error')) {
+            throw new \Exception($res->json()['error']['message']);
         }
+        return $res;
     }
 }
 

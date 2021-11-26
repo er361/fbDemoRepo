@@ -94,21 +94,6 @@ class FbAccount extends Model
 
     public function adAccounts()
     {
-        return $this->hasMany(FbAdAccount::class, 'db_fb_account_id');
-    }
-
-    public function campaigns()
-    {
-        return $this->hasMany(FbAccountCampaign::class, 'db_fb_account_id');
-    }
-
-    public function adsets()
-    {
-        return $this->hasMany(FbAccountAdset::class, 'db_fb_account_id');
-    }
-
-    public function ads()
-    {
-        return $this->hasMany(FbAccountAd::class, 'db_fb_account_id');
+        return $this->hasMany(FbAdAccount::class, 'fb_account_id');
     }
 }

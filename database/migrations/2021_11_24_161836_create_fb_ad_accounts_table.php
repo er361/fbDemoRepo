@@ -14,14 +14,15 @@ class CreateFbAdAccountsTable extends Migration
     public function up()
     {
         Schema::create('fb_ad_accounts', function (Blueprint $table) {
-            $table->string('id')->primary();
+            $table->uuid('id')->primary();
             $table->bigInteger('account_id')->index();
+            $table->string('api_id');
 
-            $table->uuid('db_fb_account_id');
+            $table->uuid('fb_account_id');
             $table->uuid('team_id');
             $table->uuid('user_id');
 
-            $table->foreign('db_fb_account_id')
+            $table->foreign('fb_account_id')
                 ->references('id')
                 ->on('fb_accounts');
 
@@ -51,6 +52,7 @@ class CreateFbAdAccountsTable extends Migration
             $table->integer('is_personal')->index();
             $table->integer('timezone_offset_hours_utc')->index();
             $table->integer('adtrust_dsl')->index();
+
             $table->timestamps();
         });
     }
