@@ -53,6 +53,35 @@ trait ApiDataFetcher
         return $res->json();
     }
 
+    private function getPages()
+    {
+        $res = \Http::get(self::BASE_URL . $this->account->facebook_id . '/accounts', [
+            'fields' => 'access_token,is_published,picture,cover,name,tasks,category,category_list',
+            'access_token' => $this->account->access_token
+        ]);
+
+        if (\Arr::exists($res->json(), 'error')) {
+            throw new \Exception($res->json()['error']['message']);
+        }
+
+        return $res->json();
+    }
+
+    private function getApps()
+    {
+        //todo узнать как делать запрос
+        $res = \Http::get(self::BASE_URL . $this->account->facebook_id . '/accounts', [
+            'fields' => 'access_token,is_published,picture,cover,name,tasks,category,category_list',
+            'access_token' => $this->account->access_token
+        ]);
+
+        if (\Arr::exists($res->json(), 'error')) {
+            throw new \Exception($res->json()['error']['message']);
+        }
+
+        return $res->json()['data'];
+    }
+
     private function getAdAccounts()
     {
         $res = \Http::get(self::BASE_URL . $this->account->facebook_id . '/adaccounts', [

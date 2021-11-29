@@ -35,7 +35,7 @@ class CreateFbAdAccountsTable extends Migration
                 ->on('users');
 
             $table->string('name')->index();
-            $table->string('amount_spent')->index();
+            $table->float('amount_spent')->index();
 
             $table->integer('account_status')->index();
 

@@ -69,4 +69,18 @@ trait SaveData
         FbInsights::insert($fill->toArray());
     }
 
+    private function savePages($pagesData)
+    {
+        $fill = collect($pagesData)->map(function ($item) {
+            return array_merge($item, [
+                'team_id' => $this->account->team_id,
+                'user_id' => $this->account->user_id,
+                'page_id' => $item['id']
+            ]);
+        });
+
+        $this->account->pages()->delete();
+        $this->account->pages()->createMany($fill);
+    }
+
 }

@@ -96,10 +96,11 @@ Route::get('test', function () {
     $fbFetchBase->process();
 
     return $account->load(
+        'pages',
         'adAccounts',
         'adAccounts.campaigns',
         'adAccounts.campaigns.adsets',
-        'adAccounts.campaigns.adsets.ads'
+        'adAccounts.campaigns.adsets.ads',
     );
 //    return $account->load('adAccounts', 'campaigns', 'adsets', 'ads');
 });

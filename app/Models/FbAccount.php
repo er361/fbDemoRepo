@@ -165,6 +165,11 @@ class FbAccount extends Model
         return $this->hasMany(FbAdAccount::class, 'fb_account_id');
     }
 
+    public function pages()
+    {
+        return $this->hasMany(FbAccountPage::class, 'fb_account_id');
+    }
+
     public function getFlatRelations()
     {
         $this->load('adAccounts', 'adAccounts.campaigns');

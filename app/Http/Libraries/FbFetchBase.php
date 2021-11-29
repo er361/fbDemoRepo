@@ -40,7 +40,17 @@ class FbFetchBase
     public function process()
     {
 //        $this->processAdEntities();
-        $this->processInsights();
+//        $this->processInsights();
+        $this->processPages();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function processPages()
+    {
+        $pagesData = $this->getPagesWithPaginate()['data'];
+        $this->savePages($pagesData);
     }
 
     private function processInsights()
@@ -146,6 +156,15 @@ class FbFetchBase
             $this->pagingNext($insights['paging']['next'], $insights);
         }
         return $insights;
+    }
+
+    public function getPagesWithPaginate(): mixed
+    {
+        $pages = $this->getPages();
+        if (\Arr::exists($pages['paging'], 'next')) {
+            $this->pagingNext($pages['paging']['next'], $pages);
+        }
+        return $pages;
     }
 }
 

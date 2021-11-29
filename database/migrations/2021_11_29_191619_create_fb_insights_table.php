@@ -22,9 +22,10 @@ class CreateFbInsightsTable extends Migration
                 'campaign',
                 'adset'
             ])->index();
+
             $table->date('date')->index();
-            $table->string('impressions')->index();
-            $table->string('spend')->index();
+            $table->bigInteger('impressions')->index();
+            $table->float('spend')->index();
 
             $table->uuid('team_id');
             $table->uuid('user_id');
