@@ -14,6 +14,54 @@ use Illuminate\Support\Facades\Log;
 
 use function Symfony\Component\Translation\t;
 
+/**
+ * App\Models\Proxy
+ *
+ * @property string $id
+ * @property string $team_id
+ * @property string $user_id
+ * @property string $type
+ * @property string|null $name
+ * @property string $host
+ * @property int $port
+ * @property string|null $login
+ * @property string|null $password
+ * @property string|null $change_ip_url
+ * @property string $status
+ * @property string|null $external_ip
+ * @property string|null $expiration_date
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\ProxyPermission[] $permissions
+ * @property-read int|null $permissions_count
+ * @property-read \App\Models\User $user
+ * @method static Builder|Proxy actionsByRole()
+ * @method static \Database\Factories\ProxyFactory factory(...$parameters)
+ * @method static Builder|Proxy newModelQuery()
+ * @method static Builder|Proxy newQuery()
+ * @method static \Illuminate\Database\Query\Builder|Proxy onlyTrashed()
+ * @method static Builder|Proxy query()
+ * @method static Builder|Proxy whereChangeIpUrl($value)
+ * @method static Builder|Proxy whereCreatedAt($value)
+ * @method static Builder|Proxy whereDeletedAt($value)
+ * @method static Builder|Proxy whereExpirationDate($value)
+ * @method static Builder|Proxy whereExternalIp($value)
+ * @method static Builder|Proxy whereHost($value)
+ * @method static Builder|Proxy whereId($value)
+ * @method static Builder|Proxy whereLogin($value)
+ * @method static Builder|Proxy whereName($value)
+ * @method static Builder|Proxy wherePassword($value)
+ * @method static Builder|Proxy wherePort($value)
+ * @method static Builder|Proxy whereStatus($value)
+ * @method static Builder|Proxy whereTeamId($value)
+ * @method static Builder|Proxy whereType($value)
+ * @method static Builder|Proxy whereUpdatedAt($value)
+ * @method static Builder|Proxy whereUserId($value)
+ * @method static \Illuminate\Database\Query\Builder|Proxy withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|Proxy withoutTrashed()
+ * @mixin \Eloquent
+ */
 class Proxy extends BaseModel
 {
     use HasFactory, Uuid, SoftDeletes;

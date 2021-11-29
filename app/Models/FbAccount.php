@@ -11,6 +11,75 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use League\CommonMark\Extension\Footnote\Node\FootnoteBackref;
 
+/**
+ * App\Models\FbAccount
+ *
+ * @property string $id
+ * @property string $user_id
+ * @property string $team_id
+ * @property string|null $proxy_id
+ * @property string $name
+ * @property string|null $notes
+ * @property string|null $user_agent
+ * @property string $access_token
+ * @property string|null $access_token_error_message
+ * @property string|null $business_access_token
+ * @property string|null $fbdtsg
+ * @property string|null $lsd
+ * @property string|null $login
+ * @property string|null $password
+ * @property string|null $cookies
+ * @property string $status
+ * @property int $activity_block
+ * @property int $archived
+ * @property string|null $facebook_id
+ * @property string|null $facebook_profile_name
+ * @property int $advertising_rules_accepted
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\FbAdAccount[] $adAccounts
+ * @property-read int|null $ad_accounts_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\FbAccountsPermission[] $permissions
+ * @property-read int|null $permissions_count
+ * @property-read \App\Models\Proxy|null $proxy
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\FbAccountsTag[] $tags
+ * @property-read int|null $tags_count
+ * @property-read \App\Models\User $user
+ * @method static Builder|FbAccount actionsByRole($permissionType = 'view')
+ * @method static \Database\Factories\FbAccountFactory factory(...$parameters)
+ * @method static Builder|FbAccount newModelQuery()
+ * @method static Builder|FbAccount newQuery()
+ * @method static \Illuminate\Database\Query\Builder|FbAccount onlyTrashed()
+ * @method static Builder|FbAccount query()
+ * @method static Builder|FbAccount whereAccessToken($value)
+ * @method static Builder|FbAccount whereAccessTokenErrorMessage($value)
+ * @method static Builder|FbAccount whereActivityBlock($value)
+ * @method static Builder|FbAccount whereAdvertisingRulesAccepted($value)
+ * @method static Builder|FbAccount whereArchived($value)
+ * @method static Builder|FbAccount whereBusinessAccessToken($value)
+ * @method static Builder|FbAccount whereCookies($value)
+ * @method static Builder|FbAccount whereCreatedAt($value)
+ * @method static Builder|FbAccount whereDeletedAt($value)
+ * @method static Builder|FbAccount whereFacebookId($value)
+ * @method static Builder|FbAccount whereFacebookProfileName($value)
+ * @method static Builder|FbAccount whereFbdtsg($value)
+ * @method static Builder|FbAccount whereId($value)
+ * @method static Builder|FbAccount whereLogin($value)
+ * @method static Builder|FbAccount whereLsd($value)
+ * @method static Builder|FbAccount whereName($value)
+ * @method static Builder|FbAccount whereNotes($value)
+ * @method static Builder|FbAccount wherePassword($value)
+ * @method static Builder|FbAccount whereProxyId($value)
+ * @method static Builder|FbAccount whereStatus($value)
+ * @method static Builder|FbAccount whereTeamId($value)
+ * @method static Builder|FbAccount whereUpdatedAt($value)
+ * @method static Builder|FbAccount whereUserAgent($value)
+ * @method static Builder|FbAccount whereUserId($value)
+ * @method static \Illuminate\Database\Query\Builder|FbAccount withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|FbAccount withoutTrashed()
+ * @mixin \Eloquent
+ */
 class FbAccount extends Model
 {
     use HasFactory, SoftDeletes;
