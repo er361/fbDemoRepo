@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
-use League\CommonMark\Extension\Footnote\Node\FootnoteBackref;
 
 /**
  * App\Models\FbAccount
@@ -164,5 +163,44 @@ class FbAccount extends Model
     public function adAccounts()
     {
         return $this->hasMany(FbAdAccount::class, 'fb_account_id');
+    }
+
+    public function getFlatRelations()
+    {
+        $this->load('adAccounts', 'adAccounts.campaigns');
+
+        $adAccounts = $this->adAccounts;
+        $campaigns = collect();
+        $adsets = collect();
+        $ads = collect();
+
+        $this->adAccounts->each(function (FbAdAccount $adAccount) use (&$campaigns) {
+            $campaigns = $campaigns->concat($adAccount->campaigns);
+        });
+
+        $this->load('adAccounts.campaigns.adsets');
+
+        $this->adAccounts->each(function (FbAdAccount $adAccount) use (&$adsets) {
+            $adAccount->campaigns->each(function (FbAccountCampaign $campaign) use (&$adsets) {
+                $adsets = $adsets->concat($campaign->adsets);
+            });
+        });
+
+        $this->load('adAccounts.campaigns.adsets.ads');
+
+        $this->adAccounts->each(function (FbAdAccount $adAccount) use (&$ads) {
+            $adAccount->campaigns->each(function (FbAccountCampaign $campaign) use (&$ads) {
+                $campaign->adsets->each(function (FbAccountAdset $adset) use (&$ads) {
+                    $ads = $ads->concat($adset->ads);
+                });
+            });
+        });
+
+        return [
+            'adAccounts' => $adAccounts,
+            'campaigns' => $campaigns,
+            'adsets' => $adsets,
+            'ads' => $ads
+        ];
     }
 }

@@ -9,17 +9,12 @@ use App\Models\FbAccountCampaign;
 use App\Models\FbAdAccount;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 
 trait ApiDataFetcher
 {
 
     private FbAccount $account;
-
-    private $adAccounts;
-    private $campaigns;
-    private $adsets;
-    private $ads;
-
 
     private $adAccountFields;
     private $campaignFields;
@@ -37,13 +32,25 @@ trait ApiDataFetcher
         return $res->json();
     }
 
-    /**
-     * @param Response $res
-     * @throws \Exception
-     */
-    protected function handleError(Response $res): void
+    private function getInsights($adObjectId, $level)
     {
-        throw new \Exception($res->json()['error']['message']);
+        $url = self::BASE_URL . $adObjectId . '/insights';
+        $res = \Http::get($url, [
+            'fields' => 'impressions,spend',
+            'access_token' => $this->account->access_token,
+            'level' => $level,
+            'time_increment' => 1,
+            'time_range' => [
+                'since' => $this->apiInsigtsSince,
+                'until' => Carbon::now()->toDateString()
+            ]
+        ]);
+
+        if (Arr::exists($res->json(), 'error')) {
+            $this->handleError($res);
+        }
+
+        return $res->json();
     }
 
     private function getAdAccounts()
@@ -58,14 +65,6 @@ trait ApiDataFetcher
         }
 
         return $res->json()['data'];
-    }
-
-    /**
-     * @return mixed
-     */
-    private function getAdAccountFields()
-    {
-        return $this->adAccountFields;
     }
 
     /**
@@ -108,6 +107,23 @@ trait ApiDataFetcher
             $this->handleError($res);
         }
         return $res->json();
+    }
+
+    /**
+     * @param Response $res
+     * @throws \Exception
+     */
+    protected function handleError(Response $res): void
+    {
+        throw new \Exception($res->json()['error']['message']);
+    }
+
+    /**
+     * @return mixed
+     */
+    private function getAdAccountFields()
+    {
+        return $this->adAccountFields;
     }
 
     /**

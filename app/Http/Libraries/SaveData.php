@@ -2,6 +2,10 @@
 
 namespace App\Http\Libraries;
 
+use App\Models\FbInsights;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
+
 trait SaveData
 {
     /**
@@ -38,6 +42,31 @@ trait SaveData
                 $parentModel->ads()->createMany($ads);
                 break;
         }
+    }
+
+    public function saveDataInsights($data, string $dbObjectId, $level)
+    {
+        $fill = collect($data)->map(function ($item) use ($dbObjectId, $level) {
+            try {
+                return collect($item)->only([
+                    'impressions',
+                    'spend'
+                ])->merge([
+                    'id' => Str::uuid()->toString(),
+                    'team_id' => $this->account->team_id,
+                    'user_id' => $this->account->user_id,
+                    'ad_object_id' => $dbObjectId,
+                    'level' => $level,
+                    'date' => $item['date_start'],
+                    'created_at' => Carbon::now()
+                ]);
+            } catch (\Exception) {
+                dd($dbObjectId);
+            }
+        });
+
+        FbInsights::whereAdObjectId($dbObjectId)->delete();
+        FbInsights::insert($fill->toArray());
     }
 
 }

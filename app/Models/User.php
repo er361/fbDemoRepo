@@ -6,16 +6,12 @@ use App\Events\Logout;
 use App\Events\UserCreatedEvent;
 use App\Listeners\CreateTeamForUser;
 use App\Models\Helpers\Uuid;
-use App\Models\Scopes\TeamScope;
-use Illuminate\Auth\EloquentUserProvider;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 

@@ -9,11 +9,14 @@ use App\Models\FbAccountCampaign;
 use App\Models\FbAdAccount;
 use Illuminate\Support\Collection;
 
+use function Symfony\Component\Translation\t;
+
 class FbFetchBase
 {
     use ApiDataFetcher, SaveData;
 
     const BASE_URL = "https://graph.facebook.com/v12.0/";
+    private $apiInsigtsSince = '2011-01-01';
 
     public function __construct(FbAccount $account)
     {
@@ -35,6 +38,37 @@ class FbFetchBase
     }
 
     public function process()
+    {
+//        $this->processAdEntities();
+        $this->processInsights();
+    }
+
+    private function processInsights()
+    {
+        $accountRelations = $this->account->getFlatRelations();
+
+        $accountRelations['adAccounts']->each(function (FbAdAccount $adAccount) {
+            $adAccountData = $this->getInsightsWithPaginate($adAccount->api_id, 'account')['data'];
+            $this->saveDataInsights($adAccountData, $adAccount->api_id, 'account');
+        });
+
+        $accountRelations['campaigns']->each(function (FbAccountCampaign $campaign) {
+            $campaignData = $this->getInsightsWithPaginate($campaign->campaign_id, 'campaign')['data'];
+            $this->saveDataInsights($campaignData, $campaign->campaign_id, 'campaign');
+        });
+
+        $accountRelations['adsets']->each(function (FbAccountAdset $adset) {
+            $adsetData = $this->getInsightsWithPaginate($adset->adset_id, 'adset')['data'];
+            $this->saveDataInsights($adsetData, $adset->adset_id, 'adset');
+        });
+
+        $accountRelations['ads']->each(function (FbAccountAd $ad) {
+            $adData = $this->getInsightsWithPaginate($ad->ad_id, 'ad')['data'];
+            $this->saveDataInsights($adData, $ad->ad_id, 'ad');
+        });
+    }
+
+    private function processAdEntities(): void
     {
         $adAccounts = $this->getAdAccounts();
         $this->saveData($adAccounts, 'adAccount', $this->account);
@@ -99,6 +133,19 @@ class FbFetchBase
         } else {
             $populateArr = collect($populateArr)->concat($nextPage['data'])->toArray();
         }
+    }
+
+    /**
+     * @param FbAdAccount $adAccount
+     * @return array|mixed
+     */
+    public function getInsightsWithPaginate($adObjectId, $level): mixed
+    {
+        $insights = $this->getInsights($adObjectId, $level);
+        if (\Arr::exists($insights['paging'], 'next')) {
+            $this->pagingNext($insights['paging']['next'], $insights);
+        }
+        return $insights;
     }
 }
 

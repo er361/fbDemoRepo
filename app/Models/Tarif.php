@@ -16,5 +16,5 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Tarif extends Model
 {
-    use HasFactory,Uuid;
+    use HasFactory, Uuid;
 }

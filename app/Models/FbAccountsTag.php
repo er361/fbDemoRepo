@@ -28,7 +28,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class FbAccountsTag extends Model
 {
-    use HasFactory,Uuid;
+    use HasFactory, Uuid;
+
     protected $fillable = [
         'user_id',
         'name',
