@@ -30,15 +30,18 @@ class CreateFbAccountAppsTable extends Migration
 
             $table->foreign('fb_ad_account_id')
                 ->references('id')
-                ->on('fb_ad_accounts');
+                ->on('fb_ad_accounts')
+                ->onDelete('cascade');
 
             $table->foreign('team_id')
                 ->references('id')
-                ->on('teams');
+                ->on('teams')
+                ->onDelete('cascade');
 
             $table->foreign('user_id')
                 ->references('id')
-                ->on('users');
+                ->on('users')
+                ->onDelete('cascade');
         });
 
         DB::statement('alter table fb_account_apps ADD FULLTEXT INDEX idx_ft_logo_url (logo_url)');
