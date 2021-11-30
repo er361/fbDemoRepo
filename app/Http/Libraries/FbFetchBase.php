@@ -39,9 +39,10 @@ class FbFetchBase
 
     public function process()
     {
-//        $this->processAdEntities();
-//        $this->processInsights();
+        $this->processAdEntities();
+        $this->processInsights();
         $this->processPages();
+        $this->processApps();
     }
 
     /**
@@ -53,13 +54,21 @@ class FbFetchBase
         $this->savePages($pagesData);
     }
 
+    public function processApps()
+    {
+        $this->account->adAccounts()->each(function (FbAdAccount $adAccount) {
+            $apps = $this->getAppsWithPaginate($adAccount->api_id)['data'];
+            $this->saveApps($apps, $adAccount);
+        });
+    }
+
     private function processInsights()
     {
         $accountRelations = $this->account->getFlatRelations();
 
         $accountRelations['adAccounts']->each(function (FbAdAccount $adAccount) {
             $adAccountData = $this->getInsightsWithPaginate($adAccount->api_id, 'account')['data'];
-            $this->saveDataInsights($adAccountData, $adAccount->api_id, 'account');
+            $this->saveDataInsights($adAccountData, $adAccount->api_id, 'adAccount');
         });
 
         $accountRelations['campaigns']->each(function (FbAccountCampaign $campaign) {
@@ -156,6 +165,16 @@ class FbFetchBase
             $this->pagingNext($insights['paging']['next'], $insights);
         }
         return $insights;
+    }
+
+    public function getAppsWithPaginate($adAccountId)
+    {
+        $apps = $this->getApps($adAccountId);
+
+        if (\Arr::exists($apps['paging'], 'next')) {
+            $this->pagingNext($apps['paging']['next'], $apps);
+        }
+        return $apps;
     }
 
     public function getPagesWithPaginate(): mixed

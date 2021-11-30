@@ -2,8 +2,11 @@
 
 namespace App\Http\Libraries;
 
-use App\Models\FbInsights;
+use App\Models\FbAccountApp;
+use App\Models\FbAdAccount;
+use App\Models\FbInsight;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 trait SaveData
@@ -44,29 +47,30 @@ trait SaveData
         }
     }
 
-    public function saveDataInsights($data, string $dbObjectId, $level)
+    public function saveDataInsights($data, string $adObjectId, $level)
     {
-        $fill = collect($data)->map(function ($item) use ($dbObjectId, $level) {
-            try {
-                return collect($item)->only([
-                    'impressions',
-                    'spend'
-                ])->merge([
-                    'id' => Str::uuid()->toString(),
-                    'team_id' => $this->account->team_id,
-                    'user_id' => $this->account->user_id,
-                    'ad_object_id' => $dbObjectId,
-                    'level' => $level,
-                    'date' => $item['date_start'],
-                    'created_at' => Carbon::now()
-                ]);
-            } catch (\Exception) {
-                dd($dbObjectId);
-            }
+        $format = function ($objectId) {
+            $explode = explode('_', $objectId);
+            return $explode[1];
+        };
+
+        $fill = collect($data)->map(function ($item) use ($adObjectId, $level, $format) {
+            return collect($item)->only([
+                'impressions',
+                'spend'
+            ])->merge([
+                'id' => Str::uuid()->toString(),
+                'team_id' => $this->account->team_id,
+                'user_id' => $this->account->user_id,
+                'object_id' => $level == 'adAccount' ? $format($adObjectId) : $adObjectId,
+                'level' => $level,
+                'date' => $item['date_start'],
+                'created_at' => Carbon::now()
+            ]);
         });
 
-        FbInsights::whereAdObjectId($dbObjectId)->delete();
-        FbInsights::insert($fill->toArray());
+        FbInsight::whereObjectId($adObjectId)->delete();
+        FbInsight::insert($fill->toArray());
     }
 
     private function savePages($pagesData)
@@ -81,6 +85,20 @@ trait SaveData
 
         $this->account->pages()->delete();
         $this->account->pages()->createMany($fill);
+    }
+
+    private function saveApps($data, FbAdAccount $adAcount)
+    {
+        $fill = collect($data)->map(function ($item) {
+            return array_merge($item, [
+                'team_id' => $this->account->team_id,
+                'user_id' => $this->account->user_id,
+                'app_id' => $item['id']
+            ]);
+        });
+
+        $adAcount->apps()->delete();
+        $adAcount->apps()->createMany($fill);
     }
 
 }

@@ -78,6 +78,8 @@ use Illuminate\Support\Facades\Auth;
  * @method static \Illuminate\Database\Query\Builder|FbAccount withTrashed()
  * @method static \Illuminate\Database\Query\Builder|FbAccount withoutTrashed()
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\FbAccountPage[] $pages
+ * @property-read int|null $pages_count
  */
 class FbAccount extends Model
 {

@@ -15,9 +15,9 @@ class CreateFbInsightsTable extends Migration
     {
         Schema::create('fb_insights', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('ad_object_id')->index();
+            $table->bigInteger('object_id')->index();
             $table->enum('level', [
-                'account',
+                'adAccount',
                 'ad',
                 'campaign',
                 'adset'

@@ -98,6 +98,7 @@ Route::get('test', function () {
     return $account->load(
         'pages',
         'adAccounts',
+        'adAccounts.apps',
         'adAccounts.campaigns',
         'adAccounts.campaigns.adsets',
         'adAccounts.campaigns.adsets.ads',

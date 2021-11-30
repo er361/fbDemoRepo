@@ -67,11 +67,10 @@ trait ApiDataFetcher
         return $res->json();
     }
 
-    private function getApps()
+    private function getApps($adAccount_id)
     {
-        //todo узнать как делать запрос
-        $res = \Http::get(self::BASE_URL . $this->account->facebook_id . '/accounts', [
-            'fields' => 'access_token,is_published,picture,cover,name,tasks,category,category_list',
+        $res = \Http::get(self::BASE_URL . $adAccount_id . '/applications', [
+            'fields' => 'id,name,logo_url,supported_platforms,object_store_urls',
             'access_token' => $this->account->access_token
         ]);
 
@@ -79,7 +78,7 @@ trait ApiDataFetcher
             throw new \Exception($res->json()['error']['message']);
         }
 
-        return $res->json()['data'];
+        return $res->json();
     }
 
     private function getAdAccounts()

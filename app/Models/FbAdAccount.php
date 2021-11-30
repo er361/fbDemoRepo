@@ -114,5 +114,10 @@ class FbAdAccount extends Model
         return $this->hasMany(FbAccountCampaign::class, 'fb_ad_account_id');
     }
 
+    public function apps()
+    {
+        return $this->hasMany(FbAccountApp::class);
+    }
+
 
 }
