@@ -16,21 +16,11 @@ trait ApiDataFetcher
 
     private FbAccount $account;
 
-    private $adAccountFields;
+
     private $campaignFields;
     private $adsetFields;
     private $adFields;
 
-    private function getNextPage($url)
-    {
-        $res = \Http::get($url);
-
-        if (Arr::exists($res->json(), 'error')) {
-            $this->handleError($res);
-        }
-
-        return $res->json();
-    }
 
     private function getInsights($adObjectId, $level)
     {
@@ -81,20 +71,6 @@ trait ApiDataFetcher
         return $res->json();
     }
 
-    private function getAdAccounts()
-    {
-        $res = \Http::get(self::BASE_URL . $this->account->facebook_id . '/adaccounts', [
-            'fields' => $this->getAdAccountFields(),
-            'access_token' => $this->account->access_token
-        ]);
-
-        if (\Arr::exists($res->json(), 'error')) {
-            throw new \Exception($res->json()['error']['message']);
-        }
-
-        return $res->json()['data'];
-    }
-
     /**
      * @param string $adAccountId
      * @return array
@@ -137,14 +113,6 @@ trait ApiDataFetcher
         return $res->json();
     }
 
-    /**
-     * @param Response $res
-     * @throws \Exception
-     */
-    protected function handleError(Response $res): void
-    {
-        throw new \Exception($res->json()['error']['message']);
-    }
 
     /**
      * @return mixed

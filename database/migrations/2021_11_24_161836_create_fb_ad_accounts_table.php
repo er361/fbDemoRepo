@@ -15,8 +15,7 @@ class CreateFbAdAccountsTable extends Migration
     {
         Schema::create('fb_ad_accounts', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->bigInteger('account_id')->index();
-            $table->string('api_id');
+            $table->bigInteger('ad_account_id')->index();
 
             $table->uuid('fb_account_id');
             $table->uuid('team_id');

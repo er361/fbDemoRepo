@@ -94,14 +94,20 @@ Route::get('test', function () {
     $account = FbAccount::withoutGlobalScopes()->firstWhere('access_token', 'like', 'EAABs%');
     $fbFetchBase = new FbFetchBase($account);
     $fbFetchBase->process();
-
-    return $account->load(
-        'pages',
-        'adAccounts',
-        'adAccounts.apps',
-        'adAccounts.campaigns',
-        'adAccounts.campaigns.adsets',
-        'adAccounts.campaigns.adsets.ads',
-    );
-//    return $account->load('adAccounts', 'campaigns', 'adsets', 'ads');
+//    DB::enableQueryLog();
+//    return \App\Models\FbAdAccount::with('insights')->first();
+//    dd(DB::getQueryLog());
+//    return $account->load(
+//        'pages',
+//        'adAccounts',
+//        'adAccounts.insights',
+//        'adAccounts.apps',
+//        'adAccounts.campaigns',
+//        'adAccounts.campaigns.adsets',
+//        'adAccounts.campaigns.adsets.ads',
+//    );
+    DB::enableQueryLog();
+    $collection = \App\Models\FbAdAccount::with('insights',)->get();
+//    dd(DB::getQueryLog());
+    return $collection;
 });

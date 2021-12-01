@@ -79,12 +79,12 @@ class FbAdAccount extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'user_id',
-        'account_id',
-        'api_id',
-        'team_id',
-        'name',
+        'ad_account_id',
         'fb_account_id',
+        'team_id',
+        'user_id',
+
+        'name',
         'amount_spent',
         'account_status',
         'balance',
@@ -109,6 +109,11 @@ class FbAdAccount extends Model
         'funding_source_details' => 'array'
     ];
 
+    public function account()
+    {
+        return $this->belongsTo(FbAccount::class);
+    }
+
     public function campaigns()
     {
         return $this->hasMany(FbAccountCampaign::class, 'fb_ad_account_id');
@@ -117,6 +122,11 @@ class FbAdAccount extends Model
     public function apps()
     {
         return $this->hasMany(FbAccountApp::class);
+    }
+
+    public function insights()
+    {
+        return $this->hasMany(FbInsight::class, 'object_id', 'account_id');
     }
 
 

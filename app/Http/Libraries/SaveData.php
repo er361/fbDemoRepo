@@ -49,12 +49,7 @@ trait SaveData
 
     public function saveDataInsights($data, string $adObjectId, $level)
     {
-        $format = function ($objectId) {
-            $explode = explode('_', $objectId);
-            return $explode[1];
-        };
-
-        $fill = collect($data)->map(function ($item) use ($adObjectId, $level, $format) {
+        $fill = collect($data)->map(function ($item) use ($adObjectId, $level) {
             return collect($item)->only([
                 'impressions',
                 'spend'
@@ -62,7 +57,7 @@ trait SaveData
                 'id' => Str::uuid()->toString(),
                 'team_id' => $this->account->team_id,
                 'user_id' => $this->account->user_id,
-                'object_id' => $level == 'adAccount' ? $format($adObjectId) : $adObjectId,
+                'object_id' => $adObjectId,
                 'level' => $level,
                 'date' => $item['date_start'],
                 'created_at' => Carbon::now()

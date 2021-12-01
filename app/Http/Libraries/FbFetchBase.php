@@ -2,6 +2,7 @@
 
 namespace App\Http\Libraries;
 
+use App\Http\Libraries\Models\FbAdAccountApi;
 use App\Models\FbAccount;
 use App\Models\FbAccountAd;
 use App\Models\FbAccountAdset;
@@ -11,7 +12,7 @@ use Illuminate\Support\Collection;
 
 use function Symfony\Component\Translation\t;
 
-class FbFetchBase
+class FbFetchBase extends FbApiQuery
 {
     use ApiDataFetcher, SaveData;
 
@@ -31,7 +32,6 @@ class FbFetchBase
         $fbAccountAdset = new FbAccountAdset();
         $fbAccountAd = new FbAccountAd();
 
-        $this->setAdAccountFields(collect($fbAdAccount->getFillable())->implode(','));
         $this->setCampaignFields(collect($fbAccountCampaign->getFillable())->implode(','));
         $this->setAdsetFields(collect($fbAccountAdset->getFillable())->implode(','));
         $this->setAdFields(collect($fbAccountAd->getFillable())->implode(','));
@@ -40,14 +40,12 @@ class FbFetchBase
     public function process()
     {
         $this->processAdEntities();
-        $this->processInsights();
-        $this->processPages();
-        $this->processApps();
+//        $this->processInsights();
+//        $this->processPages();
+//        $this->processApps();
     }
 
-    /**
-     * @return mixed
-     */
+
     public function processPages()
     {
         $pagesData = $this->getPagesWithPaginate()['data'];
@@ -68,7 +66,7 @@ class FbFetchBase
 
         $accountRelations['adAccounts']->each(function (FbAdAccount $adAccount) {
             $adAccountData = $this->getInsightsWithPaginate($adAccount->api_id, 'account')['data'];
-            $this->saveDataInsights($adAccountData, $adAccount->api_id, 'adAccount');
+            $this->saveDataInsights($adAccountData, $adAccount->account_id, 'adAccount');
         });
 
         $accountRelations['campaigns']->each(function (FbAccountCampaign $campaign) {
@@ -89,23 +87,24 @@ class FbFetchBase
 
     private function processAdEntities(): void
     {
-        $adAccounts = $this->getAdAccounts();
-        $this->saveData($adAccounts, 'adAccount', $this->account);
-
-        $this->account->adAccounts()->each(function (FbAdAccount $adAccount) {
-            $apiData = $this->parseApiData($adAccount);
-            $this->saveData($apiData->get('campaigns'), 'campaign', $adAccount);
-
-            $adAccount->campaigns()->each(function (FbAccountCampaign $campaign) use ($apiData) {
-                $adsetsByCampaign = collect($apiData->get('adsets'))->where('campaign_id', $campaign->campaign_id);
-                $this->saveData($adsetsByCampaign, 'adset', $campaign);
-
-                $campaign->adsets()->each(function (FbAccountAdset $adset) use ($apiData) {
-                    $adsByAdset = collect($apiData->get('ads'))->where('adset_id', $adset->adset_id);
-                    $this->saveData($adsByAdset, 'ad', $adset);
-                });
-            });
-        });
+        $fbAdAccountApi = new FbAdAccountApi($this->account);
+        $adAccounts = $fbAdAccountApi->getAdAccountsWithPaginate();
+        $fbAdAccountApi->saveData($adAccounts);
+//
+//        $this->account->adAccounts()->each(function (FbAdAccount $adAccount) {
+//            $apiData = $this->parseApiData($adAccount);
+//            $this->saveData($apiData->get('campaigns'), 'campaign', $adAccount);
+//
+//            $adAccount->campaigns()->each(function (FbAccountCampaign $campaign) use ($apiData) {
+//                $adsetsByCampaign = collect($apiData->get('adsets'))->where('campaign_id', $campaign->campaign_id);
+//                $this->saveData($adsetsByCampaign, 'adset', $campaign);
+//
+//                $campaign->adsets()->each(function (FbAccountAdset $adset) use ($apiData) {
+//                    $adsByAdset = collect($apiData->get('ads'))->where('adset_id', $adset->adset_id);
+//                    $this->saveData($adsByAdset, 'ad', $adset);
+//                });
+//            });
+//        });
     }
 
     private function parseApiData(FbAdAccount $adAccount): Collection
@@ -140,18 +139,6 @@ class FbFetchBase
             ->put('campaigns', $campaignsData)
             ->put('adsets', $adsetData)
             ->put('ads', $adsData);
-    }
-
-    private function pagingNext($nextUrl, array &$populateArr)
-    {
-        $nextPage = $this->getNextPage($nextUrl);
-        if (\Arr::exists($nextPage['paging'], 'next')) {
-            $populateArr = collect($populateArr)->concat($nextPage['data'])->toArray();
-
-            $this->pagingNext($nextPage['paging']['next'], $populateArr);
-        } else {
-            $populateArr = collect($populateArr)->concat($nextPage['data'])->toArray();
-        }
     }
 
     /**

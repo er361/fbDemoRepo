@@ -49,13 +49,4 @@ class FbInsight extends Model
         'impressions',
         'spend'
     ];
-
-    public function getObjectIdAttribute($value)
-    {
-        $explode = explode('_', $value);
-        if ($this->attributes['level'] == 'adAccount') {
-            return $explode[1];
-        }
-        return $value;
-    }
 }
