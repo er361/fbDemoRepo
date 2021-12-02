@@ -79,7 +79,7 @@ class FbAdAccount extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'ad_account_id',
+        'account_id',
         'fb_account_id',
         'team_id',
         'user_id',

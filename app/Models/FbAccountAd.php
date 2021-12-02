@@ -60,7 +60,11 @@ class FbAccountAd extends Model
         'account_id',
         'campaign_id',
         'adset_id',
-        'fb_account_adset_id',
+
+        'fb_adset_id',
+        'fb_campaign_id',
+        'fb_ad_account_id',
+
         'team_id',
         'user_id',
         'status',
