@@ -45,6 +45,7 @@ class FbAdAccountApi extends FbApiQuery
             'timezone_offset_hours_utc',
             'adtrust_dsl'
         ];
+
         $this->fields = implode(',', $fields);
     }
 

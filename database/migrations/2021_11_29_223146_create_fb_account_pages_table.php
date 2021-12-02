@@ -13,7 +13,7 @@ class CreateFbAccountPagesTable extends Migration
      */
     public function up()
     {
-        Schema::create('fb_account_pages', function (Blueprint $table) {
+        Schema::create('fb_pages', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('page_id')->index();
             $table->uuid('fb_account_id');
@@ -49,10 +49,10 @@ class CreateFbAccountPagesTable extends Migration
             $table->timestamps();
         });
 
-        DB::statement('alter table fb_account_pages ADD FULLTEXT INDEX idx_ft_picture (picture)');
-        DB::statement('alter table fb_account_pages ADD FULLTEXT INDEX idx_ft_categry_list (category_list)');
-        DB::statement('alter table fb_account_pages ADD FULLTEXT INDEX idx_ft_tasks (tasks)');
-        DB::statement('alter table fb_account_pages ADD FULLTEXT INDEX idx_ft_cover (cover)');
+        DB::statement('alter table fb_pages ADD FULLTEXT INDEX idx_ft_picture (picture)');
+        DB::statement('alter table fb_pages ADD FULLTEXT INDEX idx_ft_categry_list (category_list)');
+        DB::statement('alter table fb_pages ADD FULLTEXT INDEX idx_ft_tasks (tasks)');
+        DB::statement('alter table fb_pages ADD FULLTEXT INDEX idx_ft_cover (cover)');
     }
 
     /**
@@ -62,6 +62,6 @@ class CreateFbAccountPagesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('fb_account_pages');
+        Schema::dropIfExists('fb_pages');
     }
 }

@@ -13,7 +13,7 @@ class CreateFbAccountCampaignsTable extends Migration
      */
     public function up()
     {
-        Schema::create('fb_account_campaigns', function (Blueprint $table) {
+        Schema::create('fb_campaigns', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->bigInteger('campaign_id')->index();
             $table->bigInteger('account_id');
@@ -76,6 +76,6 @@ class CreateFbAccountCampaignsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('fb_account_campaigns');
+        Schema::dropIfExists('fb_campaigns');
     }
 }

@@ -15,6 +15,8 @@ class CreateFbInsightsTable extends Migration
     {
         Schema::create('fb_insights', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('fb_account_id');
+
             $table->bigInteger('object_id')->index();
 
             $table->enum('level', [
@@ -31,13 +33,20 @@ class CreateFbInsightsTable extends Migration
             $table->uuid('team_id');
             $table->uuid('user_id');
 
+            $table->foreign('fb_account_id')
+                ->references('id')
+                ->on('fb_accounts')
+                ->onDelete('cascade');
+
             $table->foreign('team_id')
                 ->references('id')
-                ->on('teams');
+                ->on('teams')
+                ->onDelete('cascade');
 
             $table->foreign('user_id')
                 ->references('id')
-                ->on('users');
+                ->on('users')
+                ->onDelete('cascade');
 
             $table->timestamps();
         });

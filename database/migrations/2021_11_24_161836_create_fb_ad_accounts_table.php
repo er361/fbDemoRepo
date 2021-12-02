@@ -38,14 +38,14 @@ class CreateFbAdAccountsTable extends Migration
 
             $table->integer('account_status')->index();
 
-            $table->string('balance')->index();
+            $table->float('balance')->index();
             $table->string('business_city')->index();
             $table->string('business_country_code')->index();
             $table->string('business_name')->index();
             $table->string('business_street')->index();
             $table->string('business_street2')->index();
             $table->boolean('is_notifications_enabled');
-            $table->string('currency')->index();
+            $table->string('currency', 3)->index();
             $table->integer('disable_reason')->index();
             $table->json('funding_source_details')->index()->nullable();
             $table->integer('is_personal')->index();

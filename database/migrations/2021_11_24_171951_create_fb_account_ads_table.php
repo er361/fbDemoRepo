@@ -13,7 +13,7 @@ class CreateFbAccountAdsTable extends Migration
      */
     public function up()
     {
-        Schema::create('fb_account_ads', function (Blueprint $table) {
+        Schema::create('fb_ads', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->bigInteger('ad_id')->index();
 
@@ -23,11 +23,25 @@ class CreateFbAccountAdsTable extends Migration
 
             $table->uuid('team_id');
             $table->uuid('user_id');
-            $table->uuid('fb_account_adset_id');
 
-            $table->foreign('fb_account_adset_id')
+            $table->uuid('fb_ad_account_id');
+            $table->uuid('fb_campaign_id');
+            $table->uuid('fb_adset_id');
+
+            $table->foreign('fb_ad_account_id')
                 ->references('id')
-                ->on('fb_account_adsets')
+                ->on('fb_ad_accounts')
+                ->onDelete('cascade');
+
+            $table->foreign('fb_campaign_id')
+                ->references('id')
+                ->on('fb_campaigns')
+                ->onDelete('cascade');
+
+
+            $table->foreign('fb_adset_id')
+                ->references('id')
+                ->on('fb_adsets')
                 ->onDelete('cascade');
 
             $table->foreign('team_id')
@@ -77,6 +91,6 @@ class CreateFbAccountAdsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('fb_account_ads');
+        Schema::dropIfExists('fb_ads');
     }
 }

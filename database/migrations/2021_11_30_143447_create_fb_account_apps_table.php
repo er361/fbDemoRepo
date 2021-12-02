@@ -13,7 +13,7 @@ class CreateFbAccountAppsTable extends Migration
      */
     public function up()
     {
-        Schema::create('fb_account_apps', function (Blueprint $table) {
+        Schema::create('fb_apps', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->bigInteger('app_id')->index();
 
@@ -44,11 +44,9 @@ class CreateFbAccountAppsTable extends Migration
                 ->onDelete('cascade');
         });
 
-        DB::statement('alter table fb_account_apps ADD FULLTEXT INDEX idx_ft_logo_url (logo_url)');
-        DB::statement(
-            'alter table fb_account_apps ADD FULLTEXT INDEX idx_ft_supported_platforms (supported_platforms)'
-        );
-        DB::statement('alter table fb_account_apps ADD FULLTEXT INDEX idx_ft_object_store_urls (object_store_urls)');
+        DB::statement('alter table fb_apps ADD FULLTEXT INDEX idx_ft_logo_url (logo_url)');
+        DB::statement('alter table fb_apps ADD FULLTEXT INDEX idx_ft_supported_platforms (supported_platforms)');
+        DB::statement('alter table fb_apps ADD FULLTEXT INDEX idx_ft_object_store_urls (object_store_urls)');
     }
 
     /**
@@ -58,6 +56,6 @@ class CreateFbAccountAppsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('fb_account_apps');
+        Schema::dropIfExists('fb_apps');
     }
 }
