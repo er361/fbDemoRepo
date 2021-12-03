@@ -1,12 +1,15 @@
 <?php
 
-namespace App\Http\Libraries;
+namespace App\Libraries;
 
-use App\Http\Libraries\Models\FbAdAccountApi;
+use App\Libraries\Models\FbAdAccountApi;
+use App\Libraries\Models\FbAdApi;
+use App\Libraries\Models\FbAdsetApi;
+use App\Libraries\Models\FbCampaignApi;
 use App\Models\FbAccount;
-use App\Models\FbAccountAd;
-use App\Models\FbAccountAdset;
-use App\Models\FbAccountCampaign;
+use App\Models\FbAd;
+use App\Models\FbAdset;
+use App\Models\FbCampaign;
 use App\Models\FbAdAccount;
 use Illuminate\Support\Collection;
 
@@ -28,9 +31,9 @@ class FbFetchBase extends FbApiQuery
     private function initFields()
     {
         $fbAdAccount = new FbAdAccount();
-        $fbAccountCampaign = new FbAccountCampaign();
-        $fbAccountAdset = new FbAccountAdset();
-        $fbAccountAd = new FbAccountAd();
+        $fbAccountCampaign = new FbCampaign();
+        $fbAccountAdset = new FbAdset();
+        $fbAccountAd = new FbAd();
 
         $this->setCampaignFields(collect($fbAccountCampaign->getFillable())->implode(','));
         $this->setAdsetFields(collect($fbAccountAdset->getFillable())->implode(','));
@@ -69,17 +72,17 @@ class FbFetchBase extends FbApiQuery
             $this->saveDataInsights($adAccountData, $adAccount->account_id, 'adAccount');
         });
 
-        $accountRelations['campaigns']->each(function (FbAccountCampaign $campaign) {
+        $accountRelations['campaigns']->each(function (FbCampaign $campaign) {
             $campaignData = $this->getInsightsWithPaginate($campaign->campaign_id, 'campaign')['data'];
             $this->saveDataInsights($campaignData, $campaign->campaign_id, 'campaign');
         });
 
-        $accountRelations['adsets']->each(function (FbAccountAdset $adset) {
+        $accountRelations['adsets']->each(function (FbAdset $adset) {
             $adsetData = $this->getInsightsWithPaginate($adset->adset_id, 'adset')['data'];
             $this->saveDataInsights($adsetData, $adset->adset_id, 'adset');
         });
 
-        $accountRelations['ads']->each(function (FbAccountAd $ad) {
+        $accountRelations['ads']->each(function (FbAd $ad) {
             $adData = $this->getInsightsWithPaginate($ad->ad_id, 'ad')['data'];
             $this->saveDataInsights($adData, $ad->ad_id, 'ad');
         });
@@ -90,55 +93,30 @@ class FbFetchBase extends FbApiQuery
         $fbAdAccountApi = new FbAdAccountApi($this->account);
         $adAccounts = $fbAdAccountApi->getAdAccountsWithPaginate();
         $fbAdAccountApi->saveData($adAccounts);
-//
-//        $this->account->adAccounts()->each(function (FbAdAccount $adAccount) {
-//            $apiData = $this->parseApiData($adAccount);
-//            $this->saveData($apiData->get('campaigns'), 'campaign', $adAccount);
-//
-//            $adAccount->campaigns()->each(function (FbAccountCampaign $campaign) use ($apiData) {
-//                $adsetsByCampaign = collect($apiData->get('adsets'))->where('campaign_id', $campaign->campaign_id);
-//                $this->saveData($adsetsByCampaign, 'adset', $campaign);
-//
-//                $campaign->adsets()->each(function (FbAccountAdset $adset) use ($apiData) {
-//                    $adsByAdset = collect($apiData->get('ads'))->where('adset_id', $adset->adset_id);
-//                    $this->saveData($adsByAdset, 'ad', $adset);
-//                });
-//            });
-//        });
-    }
 
-    private function parseApiData(FbAdAccount $adAccount): Collection
-    {
-        $data = $this->getBatchData($adAccount->api_id);
 
-        $campaignsReqData = $data[0];
-        $adsetsReqData = $data[1];
-        $adsReqData = $data[2];
+        $this->account->adAccounts()->each(function (FbAdAccount $adAccount) use ($fbAdAccountApi) {
+            $adAccountSubEntities = $fbAdAccountApi->getBatchDataWithPaginate($adAccount->ad_account_id);
 
-        $campaignsBody = json_decode($campaignsReqData['body'], true);
-        $adsetsBody = json_decode($adsetsReqData['body'], true);
-        $adsBody = json_decode($adsReqData['body'], true);
+            $fbCampaign = new FbCampaignApi();
+            $fbCampaign->saveData($adAccountSubEntities->get('campaigns'), $adAccount);
 
-        $campaignsData = $campaignsBody['data'];
-        $adsetData = $adsetsBody['data'];
-        $adsData = $adsBody['data'];
+            $adAccount->campaigns()->each(function (FbCampaign $campaign) use ($adAccountSubEntities) {
+                $adsetsByCampaign = collect($adAccountSubEntities->get('adsets'))->where(
+                    'campaign_id',
+                    $campaign->campaign_id
+                );
+                $fbCampaignApi = new FbAdsetApi();
+                $fbCampaignApi->saveData($adsetsByCampaign->toArray(), $campaign);
 
-        if (\Arr::exists($campaignsBody['paging'], 'next')) {
-            $this->pagingNext($campaignsBody['paging']['next'], $campaignsData);
-        }
 
-        if (\Arr::exists($adsetsBody['paging'], 'next')) {
-            $this->pagingNext($adsetsBody['paging']['next'], $adsetData);
-        }
-
-        if (\Arr::exists($adsBody['paging'], 'next')) {
-            $this->pagingNext($adsBody['paging']['next'], $adsData);
-        }
-
-        return collect()
-            ->put('campaigns', $campaignsData)
-            ->put('adsets', $adsetData)
-            ->put('ads', $adsData);
+                $campaign->adsets()->each(function (FbAdset $adset) use ($adAccountSubEntities) {
+                    $adsByAdset = collect($adAccountSubEntities->get('ads'))->where('adset_id', $adset->adset_id);
+                    $fbAdApi = new FbAdApi();
+                    $fbAdApi->saveData($adsByAdset->toArray(), $adset);
+                });
+            });
+        });
     }
 
     /**

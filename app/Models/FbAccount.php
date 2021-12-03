@@ -78,7 +78,7 @@ use Illuminate\Support\Facades\Auth;
  * @method static \Illuminate\Database\Query\Builder|FbAccount withTrashed()
  * @method static \Illuminate\Database\Query\Builder|FbAccount withoutTrashed()
  * @mixin \Eloquent
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\FbAccountPage[] $pages
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\FbPage[] $pages
  * @property-read int|null $pages_count
  */
 class FbAccount extends Model
@@ -169,7 +169,7 @@ class FbAccount extends Model
 
     public function pages()
     {
-        return $this->hasMany(FbAccountPage::class, 'fb_account_id');
+        return $this->hasMany(FbPage::class, 'fb_account_id');
     }
 
     public function getFlatRelations()
@@ -188,7 +188,7 @@ class FbAccount extends Model
         $this->load('adAccounts.campaigns.adsets');
 
         $this->adAccounts->each(function (FbAdAccount $adAccount) use (&$adsets) {
-            $adAccount->campaigns->each(function (FbAccountCampaign $campaign) use (&$adsets) {
+            $adAccount->campaigns->each(function (FbCampaign $campaign) use (&$adsets) {
                 $adsets = $adsets->concat($campaign->adsets);
             });
         });
@@ -196,8 +196,8 @@ class FbAccount extends Model
         $this->load('adAccounts.campaigns.adsets.ads');
 
         $this->adAccounts->each(function (FbAdAccount $adAccount) use (&$ads) {
-            $adAccount->campaigns->each(function (FbAccountCampaign $campaign) use (&$ads) {
-                $campaign->adsets->each(function (FbAccountAdset $adset) use (&$ads) {
+            $adAccount->campaigns->each(function (FbCampaign $campaign) use (&$ads) {
+                $campaign->adsets->each(function (FbAdset $adset) use (&$ads) {
                     $ads = $ads->concat($adset->ads);
                 });
             });

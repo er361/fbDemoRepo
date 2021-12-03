@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Libraries;
+namespace App\Libraries;
 
-use App\Models\FbAccountApp;
+use App\Models\FbApp;
 use App\Models\FbAdAccount;
 use App\Models\FbInsight;
 use Carbon\Carbon;

@@ -22,6 +22,7 @@ class CreateFbAccountCampaignsTable extends Migration
             $table->uuid('team_id');
             $table->uuid('user_id');
 
+
             $table->foreign('fb_ad_account_id')
                 ->references('id')
                 ->on('fb_ad_accounts')

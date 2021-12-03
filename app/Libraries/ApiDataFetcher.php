@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Libraries;
+namespace App\Libraries;
 
 use App\Models\FbAccount;
-use App\Models\FbAccountAd;
-use App\Models\FbAccountAdset;
-use App\Models\FbAccountCampaign;
+use App\Models\FbAd;
+use App\Models\FbAdset;
+use App\Models\FbCampaign;
 use App\Models\FbAdAccount;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
@@ -25,6 +25,7 @@ trait ApiDataFetcher
     private function getInsights($adObjectId, $level)
     {
         $url = self::BASE_URL . $adObjectId . '/insights';
+
         $res = \Http::get($url, [
             'fields' => 'impressions,spend',
             'access_token' => $this->account->access_token,
@@ -102,10 +103,12 @@ trait ApiDataFetcher
             $ads
         ];
 
+
         $res = \Http::post(self::BASE_URL, [
             'batch' => $subQueries,
             'access_token' => $this->account->access_token
         ]);
+
 
         if (\Arr::exists($res->json(), 'error')) {
             $this->handleError($res);

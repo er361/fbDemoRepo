@@ -34,6 +34,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|FbInsight whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FbInsight whereUserId($value)
  * @mixin \Eloquent
+ * @property string $fb_account_id
+ * @method static \Illuminate\Database\Eloquent\Builder|FbInsight whereFbAccountId($value)
  */
 class FbInsight extends Model
 {

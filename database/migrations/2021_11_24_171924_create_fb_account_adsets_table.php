@@ -22,6 +22,7 @@ class CreateFbAccountAdsetsTable extends Migration
 
             $table->uuid('fb_campaign_id');
             $table->uuid('fb_ad_account_id');
+
             $table->uuid('team_id');
             $table->uuid('user_id');
 

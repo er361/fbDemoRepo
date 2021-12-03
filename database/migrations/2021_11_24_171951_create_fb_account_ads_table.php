@@ -36,7 +36,8 @@ class CreateFbAccountAdsTable extends Migration
             $table->foreign('fb_campaign_id')
                 ->references('id')
                 ->on('fb_campaigns')
-                ->onDelete('cascade');
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
 
 
             $table->foreign('fb_adset_id')

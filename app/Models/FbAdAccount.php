@@ -10,15 +10,14 @@ use Illuminate\Database\Eloquent\Model;
  * App\Models\FbAdAccount
  *
  * @property string $id
- * @property int $account_id
- * @property string $api_id
+ * @property int $ad_account_id
  * @property string $fb_account_id
  * @property string $team_id
  * @property string $user_id
  * @property string $name
- * @property string $amount_spent
+ * @property float $amount_spent
  * @property int $account_status
- * @property string $balance
+ * @property float $balance
  * @property string $business_city
  * @property string $business_country_code
  * @property string $business_name
@@ -33,16 +32,20 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $adtrust_dsl
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\FbAccountCampaign[] $campaigns
+ * @property-read \App\Models\FbAccount $account
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\FbApp[] $apps
+ * @property-read int|null $apps_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\FbCampaign[] $campaigns
  * @property-read int|null $campaigns_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\FbInsight[] $insights
+ * @property-read int|null $insights_count
  * @method static \Illuminate\Database\Eloquent\Builder|FbAdAccount newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|FbAdAccount newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|FbAdAccount query()
- * @method static \Illuminate\Database\Eloquent\Builder|FbAdAccount whereAccountId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FbAdAccount whereAccountStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|FbAdAccount whereAdAccountId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FbAdAccount whereAdtrustDsl($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FbAdAccount whereAmountSpent($value)
- * @method static \Illuminate\Database\Eloquent\Builder|FbAdAccount whereApiId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FbAdAccount whereBalance($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FbAdAccount whereBusinessCity($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FbAdAccount whereBusinessCountryCode($value)
@@ -79,7 +82,7 @@ class FbAdAccount extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'account_id',
+        'ad_account_id',
         'fb_account_id',
         'team_id',
         'user_id',
@@ -109,6 +112,12 @@ class FbAdAccount extends Model
         'funding_source_details' => 'array'
     ];
 
+
+    public function getAdAccountIdAttribute($val)
+    {
+        return 'act_' . $val;
+    }
+
     public function account()
     {
         return $this->belongsTo(FbAccount::class);
@@ -116,12 +125,22 @@ class FbAdAccount extends Model
 
     public function campaigns()
     {
-        return $this->hasMany(FbAccountCampaign::class, 'fb_ad_account_id');
+        return $this->hasMany(FbCampaign::class, 'fb_ad_account_id');
+    }
+
+    public function adsets()
+    {
+        return $this->hasMany(FbAdset::class);
+    }
+
+    public function ads()
+    {
+        return $this->hasMany(FbAd::class);
     }
 
     public function apps()
     {
-        return $this->hasMany(FbAccountApp::class);
+        return $this->hasMany(FbApp::class);
     }
 
     public function insights()

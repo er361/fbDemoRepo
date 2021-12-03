@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Libraries;
+namespace App\Libraries;
 
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
@@ -9,13 +9,21 @@ class FbApiQuery
 {
     const BASE_URL = "https://graph.facebook.com/v12.0/";
 
-    public function client($url, $method, $options)
+    /**
+     * @param $url
+     * @param $method
+     * @param $reqData
+     * @param array $options
+     * @return \GuzzleHttp\Promise\PromiseInterface|Response
+     * @throws \Illuminate\Http\Client\RequestException
+     */
+    public function client($url, $method, $reqData, $options = [])
     {
         $res = match ($method) {
-            'GET' => \Http::withOptions($options)->get($url),
-            'POST' => \Http::withOptions($options)->post($url),
-            'PUT' => \Http::withOptions($options)->put($url),
-            'DELETE' => \Http::withOptions($options)->delete($url),
+            'GET' => \Http::withOptions($options)->get($url, $reqData),
+            'POST' => \Http::withOptions($options)->post($url, $reqData),
+            'PUT' => \Http::withOptions($options)->put($url, $reqData),
+            'DELETE' => \Http::withOptions($options)->delete($url, $reqData),
         };
 
         $error = \Arr::exists($res->json(), 'error');

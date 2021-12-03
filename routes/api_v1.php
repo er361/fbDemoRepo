@@ -4,10 +4,9 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\FbAccountController;
 use App\Http\Controllers\Api\V1\ProxyController;
 use App\Http\Controllers\Api\V1\UserController;
-use App\Http\Libraries\FbFetchBase;
+use App\Libraries\FbFetchBase;
 use App\Models\FbAccount;
 use Illuminate\Support\Facades\Route;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 /*
 |--------------------------------------------------------------------------
@@ -97,17 +96,17 @@ Route::get('test', function () {
 //    DB::enableQueryLog();
 //    return \App\Models\FbAdAccount::with('insights')->first();
 //    dd(DB::getQueryLog());
-//    return $account->load(
-//        'pages',
-//        'adAccounts',
-//        'adAccounts.insights',
-//        'adAccounts.apps',
-//        'adAccounts.campaigns',
-//        'adAccounts.campaigns.adsets',
-//        'adAccounts.campaigns.adsets.ads',
-//    );
-    DB::enableQueryLog();
-    $collection = \App\Models\FbAdAccount::with('insights',)->get();
+    return $account->load(
+        'pages',
+        'adAccounts',
+        'adAccounts.insights',
+        'adAccounts.apps',
+        'adAccounts.campaigns',
+        'adAccounts.adsets',
+        'adAccounts.ads',
+    );
+//    DB::enableQueryLog();
+//    $collection = \App\Models\FbAdAccount::with('insights',)->get();
 //    dd(DB::getQueryLog());
-    return $collection;
+//    return $collection;
 });
