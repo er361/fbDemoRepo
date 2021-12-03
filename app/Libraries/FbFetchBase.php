@@ -6,6 +6,7 @@ use App\Libraries\Models\FbAdAccountApi;
 use App\Libraries\Models\FbAdApi;
 use App\Libraries\Models\FbAdsetApi;
 use App\Libraries\Models\FbCampaignApi;
+use App\Libraries\Models\FbPagesApi;
 use App\Models\FbAccount;
 use App\Models\FbAd;
 use App\Models\FbAdset;
@@ -42,17 +43,18 @@ class FbFetchBase extends FbApiQuery
 
     public function process()
     {
-        $this->processAdEntities();
+//        $this->processAdEntities();
 //        $this->processInsights();
-//        $this->processPages();
+        $this->processPages();
 //        $this->processApps();
     }
 
 
     public function processPages()
     {
-        $pagesData = $this->getPagesWithPaginate()['data'];
-        $this->savePages($pagesData);
+        $fbPagesApi = new FbPagesApi($this->account);
+        $pagesData = $fbPagesApi->getPagesWithPaginate()['data'];
+        $fbPagesApi->saveData($pagesData);
     }
 
     public function processApps()
