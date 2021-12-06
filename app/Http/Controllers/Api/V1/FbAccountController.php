@@ -48,6 +48,7 @@ class FbAccountController extends Controller
             'filters.tags' => 'array',
             'filters.tags.*' => 'string|max:255'
         ]);
+
         $accounts = FbAccount::query()
             ->when($request->has('sort'), function (Builder $query) use ($request) {
                 if ($request->has('sort.name')) {
@@ -77,6 +78,7 @@ class FbAccountController extends Controller
                     $request->has('filters.archived'),
                     fn(Builder $q) => $q->where('archived', $request->input('filters.archived'))
                 );
+
                 //user_id
                 $query->when(
                     $request->has('filters.user_id'),
@@ -95,6 +97,7 @@ class FbAccountController extends Controller
             ->with('user:id,username,display_name')
             ->actionsByRole()
             ->paginate($request->get('perPage', 10));
+
         return FbAccountResource::collection($accounts);
     }
 

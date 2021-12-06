@@ -37,6 +37,14 @@ class FbApiQuery
         return self::BASE_URL;
     }
 
+    protected function withPaginate($data)
+    {
+        if (\Arr::exists($data['paging'], 'next')) {
+            $this->pagingNext($data['paging']['next'], $data);
+        }
+        return $data;
+    }
+
     protected function pagingNext($nextUrl, array &$populateArr)
     {
         $nextPage = $this->getNextPage($nextUrl);

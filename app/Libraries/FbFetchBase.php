@@ -5,13 +5,16 @@ namespace App\Libraries;
 use App\Libraries\Models\FbAdAccountApi;
 use App\Libraries\Models\FbAdApi;
 use App\Libraries\Models\FbAdsetApi;
+use App\Libraries\Models\FbAppsApi;
 use App\Libraries\Models\FbCampaignApi;
+use App\Libraries\Models\FbInsightsApi;
 use App\Libraries\Models\FbPagesApi;
 use App\Models\FbAccount;
 use App\Models\FbAd;
 use App\Models\FbAdset;
 use App\Models\FbCampaign;
 use App\Models\FbAdAccount;
+use App\Models\FbInsight;
 use Illuminate\Support\Collection;
 
 use function Symfony\Component\Translation\t;
@@ -26,19 +29,6 @@ class FbFetchBase extends FbApiQuery
     public function __construct(FbAccount $account)
     {
         $this->account = $account;
-        $this->initFields();
-    }
-
-    private function initFields()
-    {
-        $fbAdAccount = new FbAdAccount();
-        $fbAccountCampaign = new FbCampaign();
-        $fbAccountAdset = new FbAdset();
-        $fbAccountAd = new FbAd();
-
-        $this->setCampaignFields(collect($fbAccountCampaign->getFillable())->implode(','));
-        $this->setAdsetFields(collect($fbAccountAdset->getFillable())->implode(','));
-        $this->setAdFields(collect($fbAccountAd->getFillable())->implode(','));
     }
 
     public function process()
@@ -49,7 +39,6 @@ class FbFetchBase extends FbApiQuery
 //        $this->processApps();
     }
 
-
     public function processPages()
     {
         $fbPagesApi = new FbPagesApi($this->account);
@@ -59,34 +48,35 @@ class FbFetchBase extends FbApiQuery
 
     public function processApps()
     {
-        $this->account->adAccounts()->each(function (FbAdAccount $adAccount) {
-            $apps = $this->getAppsWithPaginate($adAccount->api_id)['data'];
-            $this->saveApps($apps, $adAccount);
+        $fbAppsApi = new FbAppsApi($this->account);
+        $this->account->adAccounts()->each(function (FbAdAccount $adAccount) use ($fbAppsApi) {
+            $apps = $fbAppsApi->getAppsWithPaginate($adAccount)['data'];
+            $fbAppsApi->saveData($apps, $adAccount);
         });
     }
 
     private function processInsights()
     {
-        $accountRelations = $this->account->getFlatRelations();
+        $fbInsightsApi = new FbInsightsApi($this->account);
 
-        $accountRelations['adAccounts']->each(function (FbAdAccount $adAccount) {
-            $adAccountData = $this->getInsightsWithPaginate($adAccount->api_id, 'account')['data'];
-            $this->saveDataInsights($adAccountData, $adAccount->account_id, 'adAccount');
-        });
+        $this->account->adAccounts()->each(function (FbAdAccount $adAccount) use ($fbInsightsApi) {
+            $adAccountInsghts = $fbInsightsApi->getInsightsWithPaginate($adAccount->ad_account_id, 'adAccount');
+            $fbInsightsApi->saveData($adAccountInsghts, $adAccount->ad_account_id, 'adAccount');
 
-        $accountRelations['campaigns']->each(function (FbCampaign $campaign) {
-            $campaignData = $this->getInsightsWithPaginate($campaign->campaign_id, 'campaign')['data'];
-            $this->saveDataInsights($campaignData, $campaign->campaign_id, 'campaign');
-        });
+            $adAccount->campaigns()->each(function (FbCampaign $campaign) use ($fbInsightsApi) {
+                $campaignInsgths = $fbInsightsApi->getInsightsWithPaginate($campaign->campaign_id, 'campaign');
+                $fbInsightsApi->saveData($campaignInsgths, $campaign->campaign_id, 'campaign');
+            });
 
-        $accountRelations['adsets']->each(function (FbAdset $adset) {
-            $adsetData = $this->getInsightsWithPaginate($adset->adset_id, 'adset')['data'];
-            $this->saveDataInsights($adsetData, $adset->adset_id, 'adset');
-        });
+            $adAccount->adsets()->each(function (FbAdset $adset) use ($fbInsightsApi) {
+                $adsetInsghts = $fbInsightsApi->getInsightsWithPaginate($adset->adset_id, 'adset');
+                $fbInsightsApi->saveData($adsetInsghts, $adset->adset_id, 'adset');
+            });
 
-        $accountRelations['ads']->each(function (FbAd $ad) {
-            $adData = $this->getInsightsWithPaginate($ad->ad_id, 'ad')['data'];
-            $this->saveDataInsights($adData, $ad->ad_id, 'ad');
+            $adAccount->ads()->each(function (FbAd $ad) use ($fbInsightsApi) {
+                $adInsghts = $fbInsightsApi->getInsightsWithPaginate($ad->ad_id, 'ad');
+                $fbInsightsApi->saveData($adInsghts, $ad->ad_id, 'ad');
+            });
         });
     }
 
@@ -119,38 +109,6 @@ class FbFetchBase extends FbApiQuery
                 });
             });
         });
-    }
-
-    /**
-     * @param FbAdAccount $adAccount
-     * @return array|mixed
-     */
-    public function getInsightsWithPaginate($adObjectId, $level): mixed
-    {
-        $insights = $this->getInsights($adObjectId, $level);
-        if (\Arr::exists($insights['paging'], 'next')) {
-            $this->pagingNext($insights['paging']['next'], $insights);
-        }
-        return $insights;
-    }
-
-    public function getAppsWithPaginate($adAccountId)
-    {
-        $apps = $this->getApps($adAccountId);
-
-        if (\Arr::exists($apps['paging'], 'next')) {
-            $this->pagingNext($apps['paging']['next'], $apps);
-        }
-        return $apps;
-    }
-
-    public function getPagesWithPaginate(): mixed
-    {
-        $pages = $this->getPages();
-        if (\Arr::exists($pages['paging'], 'next')) {
-            $this->pagingNext($pages['paging']['next'], $pages);
-        }
-        return $pages;
     }
 }
 

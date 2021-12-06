@@ -32,7 +32,7 @@ class FbPagesApi extends FbApiQuery
             $this->getBaseUrl() . $this->account->facebook_id . '/accounts',
             'GET',
             [
-                'fields' => 'access_token,is_published,picture,cover,name,tasks,category,category_list',
+                'fields' => 'access_token,is_published,picture{url},cover{source},name,tasks,category,category_list',
                 'access_token' => $this->account->access_token
             ]
         );
@@ -45,7 +45,9 @@ class FbPagesApi extends FbApiQuery
             return array_merge($item, [
                 'team_id' => $this->account->team_id,
                 'user_id' => $this->account->user_id,
-                'page_id' => $item['id']
+                'page_id' => $item['id'],
+                'picture' => $item['picture']['data']['url'],
+                'cover' => \Arr::exists($item, 'cover',) ? $item['cover']['source'] : null
             ]);
         });
 

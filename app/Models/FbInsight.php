@@ -42,7 +42,7 @@ class FbInsight extends Model
     use HasFactory, Uuid;
 
     protected $fillable = [
-        'id',
+        'fb_account_id',
         'object_id',
         'level',
         'date',
