@@ -56,7 +56,17 @@ class CreateFbAccountCampaignsTable extends Migration
             $table->string('daily_budget')->nullable()->index();
             $table->string('lifetime_budget')->nullable()->index();
             $table->decimal('budget_remaining')->index();
-            $table->string('objective')->index();
+            $table->enum('objective', [
+                'APP_INSTALLS',
+                'CONVERSIONS',
+                'EVENT_RESPONSES',
+                'LEAD_GENERATION',
+                'LINK_CLICKS',
+                'MESSAGES',
+                'PAGE_LIKES',
+                'POST_ENGAGEMENT',
+                'VIDEO_VIEWS'
+            ])->index();
 
             $table->enum('bid_strategy', [
                 'LOWEST_COST_WITHOUT_CAP',

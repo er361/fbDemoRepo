@@ -33,9 +33,9 @@ class FbFetchBase extends FbApiQuery
 
     public function process()
     {
-//        $this->processAdEntities();
+        $this->processAdEntities();
 //        $this->processInsights();
-        $this->processPages();
+//        $this->processPages();
 //        $this->processApps();
     }
 
