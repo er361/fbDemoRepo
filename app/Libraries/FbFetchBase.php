@@ -34,14 +34,14 @@ class FbFetchBase
 
     public function process()
     {
-//        $this->processAdEntities();
-//        $this->processInsights();
-//        $this->processPages();
-//        $this->processApps();
+        $this->processAdEntities();
+        $this->processInsights();
+        $this->processPages();
+        $this->processApps();
         $this->processCreatives();
     }
 
-    public function processCreatives()
+    protected function processCreatives()
     {
         $fbCreativeApi = new FbCreativeApi($this->account);
 
@@ -52,14 +52,14 @@ class FbFetchBase
         });
     }
 
-    public function processPages()
+    protected function processPages()
     {
         $fbPagesApi = new FbPagesApi($this->account);
         $pagesData = $fbPagesApi->getPagesWithPaginate()['data'];
         $fbPagesApi->saveData($pagesData);
     }
 
-    public function processApps()
+    protected function processApps()
     {
         $fbAppsApi = new FbAppsApi($this->account);
         $this->account->adAccounts()->each(function (FbAdAccount $adAccount) use ($fbAppsApi) {
@@ -68,7 +68,7 @@ class FbFetchBase
         });
     }
 
-    private function processInsights()
+    protected function processInsights()
     {
         $fbInsightsApi = new FbInsightsApi($this->account);
 
@@ -93,7 +93,7 @@ class FbFetchBase
         });
     }
 
-    private function processAdEntities(): void
+    protected function processAdEntities(): void
     {
         $fbAdAccountApi = new FbAdAccountApi($this->account);
         $adAccounts = $fbAdAccountApi->getAdAccountsWithPaginate();
