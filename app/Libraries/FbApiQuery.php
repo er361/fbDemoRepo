@@ -5,9 +5,17 @@ namespace App\Libraries;
 use App\Models\FbAccount;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
+use Symfony\Component\Console\Helper\ProgressBar;
 
 abstract class FbApiQuery
 {
+    protected ProgressBar $progressBar;
+
+    public function setProgressBar(ProgressBar $progressBar)
+    {
+        $this->progressBar = $progressBar;
+    }
+
     const BASE_URL = "https://graph.facebook.com/v12.0/";
 
     public abstract function getFbAccount(): FbAccount;

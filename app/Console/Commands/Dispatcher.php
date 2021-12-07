@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Jobs\FbFetcherJob;
 use App\Jobs\FetchAccountData;
 use App\Jobs\OnDemandFetcherJob;
+use App\Libraries\FbFetchBase;
 use App\Models\FbAccount;
 use App\Models\OnDemand;
 use Illuminate\Console\Command;
@@ -16,7 +17,7 @@ class Dispatcher extends Command
      *
      * @var string
      */
-    protected $signature = 'dispatcher:run';
+    protected $signature = 'dispatcher:run {accountId}';
 
     /**
      * The console command description.
@@ -42,10 +43,6 @@ class Dispatcher extends Command
      */
     public function handle()
     {
-//        $this->runOnDemand();
-//
-//        $this->runOnSchedule();
-        $this->runTest();
         return Command::SUCCESS;
     }
 
