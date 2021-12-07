@@ -67,4 +67,9 @@ class FbInsightsApi extends FbApiQuery
         FbInsight::whereObjectId($adObjectId)->delete();
         FbInsight::insert($fill->toArray());
     }
+
+    public function getFbAccount(): FbAccount
+    {
+        return $this->account;
+    }
 }

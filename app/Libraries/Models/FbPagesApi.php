@@ -54,4 +54,9 @@ class FbPagesApi extends FbApiQuery
         $this->account->pages()->delete();
         $this->account->pages()->createMany($fill);
     }
+
+    public function getFbAccount(): FbAccount
+    {
+        return $this->account;
+    }
 }

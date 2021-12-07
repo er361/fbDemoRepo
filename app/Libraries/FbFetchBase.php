@@ -7,6 +7,7 @@ use App\Libraries\Models\FbAdApi;
 use App\Libraries\Models\FbAdsetApi;
 use App\Libraries\Models\FbAppsApi;
 use App\Libraries\Models\FbCampaignApi;
+use App\Libraries\Models\FbCreativeApi;
 use App\Libraries\Models\FbInsightsApi;
 use App\Libraries\Models\FbPagesApi;
 use App\Models\FbAccount;
@@ -19,7 +20,7 @@ use Illuminate\Support\Collection;
 
 use function Symfony\Component\Translation\t;
 
-class FbFetchBase extends FbApiQuery
+class FbFetchBase
 {
     use ApiDataFetcher, SaveData;
 
@@ -33,10 +34,22 @@ class FbFetchBase extends FbApiQuery
 
     public function process()
     {
-        $this->processAdEntities();
+//        $this->processAdEntities();
 //        $this->processInsights();
 //        $this->processPages();
 //        $this->processApps();
+        $this->processCreatives();
+    }
+
+    public function processCreatives()
+    {
+        $fbCreativeApi = new FbCreativeApi($this->account);
+
+        $this->account->adAccounts()->each(function (FbAdAccount $adAccount) use ($fbCreativeApi) {
+            $creatives = $fbCreativeApi->getCreatives($adAccount);
+            $creativesAll = $fbCreativeApi->withPaginate($creatives)['data'];
+            $fbCreativeApi->saveData($creativesAll, $adAccount);
+        });
     }
 
     public function processPages()

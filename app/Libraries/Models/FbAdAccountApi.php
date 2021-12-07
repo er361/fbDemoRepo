@@ -168,4 +168,8 @@ class FbAdAccountApi extends FbApiQuery
             ->put('ads', $adsData);
     }
 
+    public function getFbAccount(): FbAccount
+    {
+        return $this->account;
+    }
 }

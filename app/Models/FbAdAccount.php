@@ -138,6 +138,11 @@ class FbAdAccount extends Model
         return $this->hasMany(FbAd::class);
     }
 
+    public function creatives()
+    {
+        return $this->hasMany(FbCreative::class);
+    }
+
     public function apps()
     {
         return $this->hasMany(FbApp::class);

@@ -5,7 +5,7 @@ namespace App\Libraries\Models;
 use App\Libraries\FbApiQuery;
 use App\Models\FbAdAccount;
 
-class FbCampaignApi extends FbApiQuery
+class FbCampaignApi
 {
     public function saveData(array $data, FbAdAccount $adAccount)
     {

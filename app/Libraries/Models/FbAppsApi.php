@@ -51,4 +51,9 @@ class FbAppsApi extends FbApiQuery
         $adAccount->apps()->delete();
         $adAccount->apps()->createMany($fill);
     }
+
+    public function getFbAccount(): FbAccount
+    {
+        return $this->account;
+    }
 }

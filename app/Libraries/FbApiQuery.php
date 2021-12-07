@@ -2,12 +2,15 @@
 
 namespace App\Libraries;
 
+use App\Models\FbAccount;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 
-class FbApiQuery
+abstract class FbApiQuery
 {
     const BASE_URL = "https://graph.facebook.com/v12.0/";
+
+    public abstract function getFbAccount(): FbAccount;
 
     /**
      * @param $url
@@ -19,12 +22,17 @@ class FbApiQuery
      */
     public function client($url, $method, $reqData, $options = [])
     {
+        if (!Arr::exists($reqData, 'access_token')) {
+            $reqData['access_token'] = $this->getFbAccount()->access_token;
+        }
+
         $res = match ($method) {
             'GET' => \Http::withOptions($options)->get($url, $reqData),
             'POST' => \Http::withOptions($options)->post($url, $reqData),
             'PUT' => \Http::withOptions($options)->put($url, $reqData),
             'DELETE' => \Http::withOptions($options)->delete($url, $reqData),
         };
+
 
         $error = \Arr::exists($res->json(), 'error');
         $res->throwIf($error);
@@ -37,7 +45,7 @@ class FbApiQuery
         return self::BASE_URL;
     }
 
-    protected function withPaginate($data)
+    public function withPaginate($data)
     {
         if (\Arr::exists($data['paging'], 'next')) {
             $this->pagingNext($data['paging']['next'], $data);
