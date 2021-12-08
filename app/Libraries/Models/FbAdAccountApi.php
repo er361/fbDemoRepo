@@ -8,8 +8,10 @@ use App\Models\FbAd;
 use App\Models\FbAdAccount;
 use App\Models\FbAdset;
 use App\Models\FbCampaign;
+use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Symfony\Component\Console\Helper\ProgressBar;
 
 class FbAdAccountApi extends FbApiQuery
 {
@@ -70,6 +72,8 @@ class FbAdAccountApi extends FbApiQuery
     public function getAdAccountsWithPaginate()
     {
         $adAccounts = $this->getAdAccounts(false);
+
+        $this->progressBar->advance();
 
         if (\Arr::exists($adAccounts['paging'], 'next')) {
             $this->pagingNext($adAccounts['paging']['next'], $adAccounts);

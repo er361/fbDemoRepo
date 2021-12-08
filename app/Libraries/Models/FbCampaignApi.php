@@ -3,9 +3,10 @@
 namespace App\Libraries\Models;
 
 use App\Libraries\FbApiQuery;
+use App\Models\FbAccount;
 use App\Models\FbAdAccount;
 
-class FbCampaignApi
+class FbCampaignApi extends FbApiQuery
 {
     public function saveData(array $data, FbAdAccount $adAccount)
     {
@@ -16,8 +17,12 @@ class FbCampaignApi
                 'campaign_id' => $item['id']
             ]);
         });
-
         $adAccount->campaigns()->delete();
         $adAccount->campaigns()->createMany($fill);
+    }
+
+    public function getFbAccount(): FbAccount
+    {
+        // TODO: Implement getFbAccount() method.
     }
 }
