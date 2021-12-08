@@ -66,5 +66,21 @@ class FbAccountSeeder extends Seeder
             'status'       => 'ACTIVE',
             'archived'     => true
         ]);
+
+        // аккаунты для теста массового изменения тегов
+        FbAccount::create([
+            'team_id'      => $user->team_id,
+            'user_id'      => $user->id,
+            'name'         => 'accountForMultipleTags_1',
+            'access_token' => 'aaa',
+            'status'       => 'ACTIVE',
+        ]);
+        FbAccount::create([
+            'team_id'      => $user->team_id,
+            'user_id'      => $user->id,
+            'name'         => 'accountForMultipleTags_2',
+            'access_token' => 'aaa',
+            'status'       => 'ACTIVE',
+        ]);
     }
 }
